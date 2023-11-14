@@ -44,9 +44,27 @@ namespace HardwareMonitor
             WebMessage message = JsonSerializer.Deserialize<WebMessage>(args.WebMessageAsJson);
             if (message.Type == "GET")
             {
-                dynamic result = null;
-                webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(result));
-                return;
+                if (message.Target == "_ALL_")
+                {
+                    dynamic result = Hardware.Instance.GetData();
+                    Database db = new Database(SettingManager.GetSetting().DatabasePath);
+                    db.Connect();
+
+                    if (result != null)
+                    {
+                        var machine = db.GetMachine(result.MachineName, result.URI);
+                        if (machine == null)
+                            db.SaveMachine(result.MachineName, result.URI);
+                        machine = db.GetMachine(result.MachineName, result.URI);
+                        foreach (var hardware in result.Hardware)
+                        {
+                            db.SaveData(hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors, SettingManager.GetSetting().JsonOptions), machine);
+                        }
+                    }
+                    db.Disconnect();
+                    webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(result));
+                    return;
+                }
             }
             return;
         }

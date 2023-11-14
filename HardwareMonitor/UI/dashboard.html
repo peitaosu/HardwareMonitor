@@ -11,73 +11,328 @@
 
     <link rel="stylesheet" href="css/custom.css">
 </head>
+
 <body data-bs-theme="dark">
     <div class="layout-fluid">
         <div class="page">
             <header class="navbar navbar-expand-md sticky-top d-print-none">
-            <div class="container-xl">
-                <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                    <i class="ti ti-heart-rate-monitor"></i> Hardware Monitor
-                </h1>
-        
-                <div class="navbar-nav flex-row order-md-last">
-                    <div class="nav-item">
-                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                            <i class="ti ti-arrow-bar-down"></i>
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                            <i class="ti ti-window-minimize"></i>
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                            <i class="ti ti-window-maximize"></i>
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                            <i class="ti ti-square-x"></i>
-                        </a>
+                <div class="container-xl">
+                    <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+                        <i class="ti ti-heart-rate-monitor"></i> Hardware Monitor
+                    </h1>
+
+                    <div class="navbar-nav flex-row order-md-last">
+                        <div class="nav-item">
+                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-arrow-bar-down"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-window-minimize"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-window-maximize"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
+                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-square-x"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
             </header>
             <div class="page-wrapper">
-            <div class="page-body">
-                <div class="container-xl">
-                <div class="row row-deck row-cards">
-                    <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height:100em"></div>
-                    </div>
-                    </div>
-                    <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height:100em"></div>
-                    </div>
-                    </div>
-                    <div class="col-4">
-                    <div class="card">
-                        <div class="card-body" style="height:100em"></div>
-                    </div>
-                    </div>
-                    <div class="col-12">
-                    <div class="card">
-                        <div class="card-body" style="height:100em"></div>
-                    </div>
+                <div class="page-body">
+                    <div class="container-xl">
+                        <div class="row row-deck row-cards">
+                            <!--Machine-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/machine.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                Machine
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_machine"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--IP-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/ip.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                IPv4
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_ipv4"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Motherboard-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/motherboard.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                Motherboard
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_motherboard"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--CPU-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/cpu.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                CPU
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_cpu"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-8 col-xl-8">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/cpu.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                CPU
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--RAM-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/ram.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                RAM
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_ram"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--GPU-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/gpu.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                GPU
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_gpu"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--FAN-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/fan.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                FAN
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                    <span id="name_fan"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Ethernet-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/port.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                Ethernet
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                $Ethernet
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--HDD-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/hdd.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                HDD
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                $HDD
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--SSD-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-auto">
+                                                <span class="text-white avatar">
+                                                    <img src="image/hdd.svg" />
+                                                </span>
+                                            </div>
+                                            <div class="col">
+                                                <div class="text-secondary">
+                                                SSD
+                                                </div>
+                                                <div class="font-weight-medium">
+                                                $SSD
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                </div>
-            </div>
             </div>
         </div>
     </div>
-      
+
     <script src="tabler/dist/js/tabler.min.js"></script>
     <script src="tabler/dist/libs/apexcharts/dist/apexcharts.min.js"></script>
 
-</body>
-</html>
+    <script>
+        "use strict";
+        window.chrome.webview.postMessage({
+            "Type": "GET",
+            "Source": "Dashboard",
+            "Target": "_ALL_",
+            "Message": {}
+        });
+        window.chrome.webview.addEventListener("message", event => {
+            console.log(event);
+            document.querySelector("#name_machine").innerHTML = event.data.MachineName;
+            document.querySelector("#name_ipv4").innerHTML = event.data.URI;
+            event.data.Hardware.forEach(hardware => {
+                switch(hardware.Type){
+                    case "Motherboard":
+                        document.querySelector("#name_motherboard").innerHTML = hardware.Name;
+                        break;
+                    case "Cpu":
+                        document.querySelector("#name_cpu").innerHTML = hardware.Name;
+                        break;
+                    case "Memory":
+                        document.querySelector("#name_ram").innerHTML = hardware.Name;
+                        break;
+                    case "GpuAmd":
+                        document.querySelector("#name_gpu").innerHTML = hardware.Name;
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
+    </script>
 
+</body>
+
+</html>

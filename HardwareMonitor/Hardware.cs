@@ -74,10 +74,11 @@ namespace HardwareMonitor
         public dynamic? GetData(string identifier = "")
         {
             bool identified = !string.IsNullOrEmpty(identifier);
+            string ipv4 = Utils.GetLocalIPv4(NetworkInterfaceType.Ethernet);
             dynamic result = new
             {
                 MachineName = Environment.MachineName,
-                URI = Utils.GetLocalIPv4(NetworkInterfaceType.Ethernet),
+                URI = string.IsNullOrEmpty(ipv4) ? Utils.GetLocalIPv4(NetworkInterfaceType.Wireless80211) : ipv4,
                 Hardware = new List<dynamic>() { }
             };
             if (_computer != null)
