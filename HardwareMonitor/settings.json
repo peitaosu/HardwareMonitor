@@ -1,0 +1,9 @@
+{
+    "DatabasePath": "test.sqlite3",
+    "LogPath": "test.log",
+    "WebCachePath": "C:\\ProgramData\\HardwareMonitor\\Cache",
+    "UseOnlinePage": false,
+    "JsonOptions": {
+        "WriteIndented": true
+    }
+}

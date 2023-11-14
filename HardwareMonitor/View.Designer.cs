@@ -1,6 +1,6 @@
 ﻿namespace HardwareMonitor
 {
-    partial class Form1
+    partial class View
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,12 +28,35 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)webView).BeginInit();
+            SuspendLayout();
+            // 
+            // webView
+            // 
+            webView.AllowExternalDrop = true;
+            webView.CreationProperties = null;
+            webView.DefaultBackgroundColor = Color.White;
+            webView.Location = new Point(0, 0);
+            webView.Name = "webView";
+            webView.Size = new Size(802, 452);
+            webView.TabIndex = 0;
+            webView.ZoomFactor = 1D;
+            // 
+            // View
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(webView);
+            Name = "View";
+            Text = "Hardware Monitor";
+            ((System.ComponentModel.ISupportInitialize)webView).EndInit();
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Microsoft.Web.WebView2.WinForms.WebView2 webView;
     }
 }

@@ -15,13 +15,21 @@
     <PackageReference Include="System.IO.Ports" Version="7.0.0.0" />
     <PackageReference Include="HidSharp" Version="2.1.0.0" />
     <PackageReference Include="System.Management" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2151.40" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="LibreHardwareMonitorLib">
       <HintPath>..\..\LibreHardwareMonitor\bin\Debug\net6.0\LibreHardwareMonitorLib.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UI\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

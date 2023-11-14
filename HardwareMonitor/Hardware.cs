@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using LibreHardwareMonitor.Hardware;
 
 namespace HardwareMonitor
@@ -75,6 +77,7 @@ namespace HardwareMonitor
             dynamic result = new
             {
                 MachineName = Environment.MachineName,
+                URI = Utils.GetLocalIPv4(NetworkInterfaceType.Ethernet),
                 Hardware = new List<dynamic>() { }
             };
             if (_computer != null)
@@ -86,7 +89,7 @@ namespace HardwareMonitor
                         Type = hardware.HardwareType.ToString(),
                         Name = hardware.Name,
                         Identifier = hardware.Identifier.ToString(),
-                        Sensors = new Dictionary<string, Dictionary<string, dynamic>>() { },
+                        Sensors = new Dictionary<string, Dictionary<string, Dictionary<string, dynamic>>>() { },
                         SubHardwares = new List<dynamic>() { },
                     };
                     hardware.Update();
@@ -97,7 +100,7 @@ namespace HardwareMonitor
                             Type = subhardware.HardwareType.ToString(),
                             Name = subhardware.Name,
                             Identifier = subhardware.Identifier.ToString(),
-                            Sensors = new Dictionary<string, Dictionary<string, dynamic>>() { },
+                            Sensors = new Dictionary<string, Dictionary<string, Dictionary<string, dynamic>>>() { },
                         };
                         subhardware.Update();
 
@@ -105,16 +108,17 @@ namespace HardwareMonitor
                         {
                             string type = sensor.SensorType.ToString();
                             string id = sensor.Identifier.ToString();
+                            string name = sensor.Name;
                             dynamic sensor_data = new
                             {
-                                Name = sensor.Name,
                                 Value = sensor.Value,
                                 Max = sensor.Max,
                                 Min = sensor.Min,
                             };
                             if (identified && identifier.Equals(id, StringComparison.OrdinalIgnoreCase)) return sensor_data;
-                            if (!subhardware_data.Sensors.ContainsKey(type)) subhardware_data.Sensors[type] = new Dictionary<string, dynamic>();
-                            subhardware_data.Sensors[type].Add(id, sensor_data);
+                            if (!subhardware_data.Sensors.ContainsKey(type)) subhardware_data.Sensors[type] = new Dictionary<string, Dictionary<string, dynamic>>();
+                            if (!subhardware_data.Sensors[type].ContainsKey(id)) subhardware_data.Sensors[type][id] = new Dictionary<string, dynamic>();
+                            subhardware_data.Sensors[type][id].Add(name, sensor_data);
                         }
                         if (identified && identifier.Equals(subhardware_data.Identifier, StringComparison.OrdinalIgnoreCase)) return subhardware_data;
                         hardware_data.SubHardwares.Add(subhardware_data);
@@ -125,16 +129,17 @@ namespace HardwareMonitor
                     {
                         string type = sensor.SensorType.ToString();
                         string id = sensor.Identifier.ToString();
+                        string name = sensor.Name;
                         dynamic sensor_data = new
                         {
-                            Name = sensor.Name,
                             Value = sensor.Value,
                             Max = sensor.Max,
                             Min = sensor.Min,
                         };
                         if (identified && identifier.Equals(id, StringComparison.OrdinalIgnoreCase)) return sensor_data;
-                        if (!hardware_data.Sensors.ContainsKey(type)) hardware_data.Sensors[type] = new Dictionary<string, dynamic>();
-                        hardware_data.Sensors[type].Add(id, sensor_data);
+                        if (!hardware_data.Sensors.ContainsKey(type)) hardware_data.Sensors[type] = new Dictionary<string, Dictionary<string, dynamic>>();
+                        if (!hardware_data.Sensors[type].ContainsKey(id)) hardware_data.Sensors[type][id] = new Dictionary<string, dynamic>();
+                        hardware_data.Sensors[type][id].Add(name, sensor_data);
                     }
                     if (identified && identifier.Equals(hardware_data.Identifier, StringComparison.OrdinalIgnoreCase)) return hardware_data;
                     result.Hardware.Add(hardware_data);

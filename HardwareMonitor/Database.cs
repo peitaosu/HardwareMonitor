@@ -22,7 +22,8 @@ namespace HardwareMonitor
             CREATE TABLE IF NOT EXISTS Machine (
                 ID integer primary key autoincrement,
                 Name varchar(32),
-                URI varchar(32)
+                URI varchar(32),
+                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
             ";
             create.ExecuteNonQuery();
@@ -35,6 +36,7 @@ namespace HardwareMonitor
                 Identifier varchar(32),
                 Sensors text,
                 Machine integer,
+                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 foreign key(Machine) references Machine(ID)
             );
             ";
@@ -68,7 +70,24 @@ namespace HardwareMonitor
             return insert.ExecuteNonQuery() > 0;
         }
 
-        public bool SaveData(string hardware, string name, string identifier, string sensors, int machine)
+        public long? GetMachine(string name, string URI)
+        {
+            var select = _connection.CreateCommand();
+            // get machine id by using name and URI
+            select.CommandText =
+            @"
+            SELECT ID
+            FROM Machine
+            WHERE
+            Name = $Name AND URI = $URI
+            ;
+            ";
+            select.Parameters.AddWithValue("$Name", name);
+            select.Parameters.AddWithValue("$URI", URI);
+            return (long?)select.ExecuteScalar();
+        }
+
+        public bool SaveData(string hardware, string name, string identifier, string sensors, long machine)
         {
             var insert = _connection.CreateCommand();
             insert.CommandText =
