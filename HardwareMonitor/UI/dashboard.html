@@ -61,7 +61,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                Machine
+                                                    Machine
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_machine"></span>
@@ -83,7 +83,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                IPv4
+                                                    IPv4
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_ipv4"></span>
@@ -105,7 +105,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                Motherboard
+                                                    Motherboard
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_motherboard"></span>
@@ -126,14 +126,14 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="d-flex">
-                                              <h3 class="card-title">CPU Usage</h3>
-                                              <div class="ms-auto">
-                                                <span id="name_cpu"></span>
-                                              </div>
-                                            </div>
-                                            <div id="chart-cpu-load">
+                                                <h3 class="card-title">CPU Usage</h3>
+                                                <div class="ms-auto">
+                                                    <span id="name_cpu"></span>
+                                                </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div id="chart-cpu-load">
                                     </div>
                                 </div>
                             </div>
@@ -149,7 +149,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                RAM
+                                                    RAM
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_ram"></span>
@@ -171,7 +171,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                GPU
+                                                    GPU
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_gpu"></span>
@@ -193,7 +193,7 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                FAN
+                                                    FAN
                                                 </div>
                                                 <div class="font-weight-medium">
                                                     <span id="name_fan"></span>
@@ -215,10 +215,10 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                Ethernet
+                                                    Ethernet
                                                 </div>
                                                 <div class="font-weight-medium">
-                                                $Ethernet
+                                                    $Ethernet
                                                 </div>
                                             </div>
                                         </div>
@@ -237,10 +237,10 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                HDD
+                                                    HDD
                                                 </div>
                                                 <div class="font-weight-medium">
-                                                $HDD
+                                                    $HDD
                                                 </div>
                                             </div>
                                         </div>
@@ -259,10 +259,10 @@
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                SSD
+                                                    SSD
                                                 </div>
                                                 <div class="font-weight-medium">
-                                                $SSD
+                                                    $SSD
                                                 </div>
                                             </div>
                                         </div>
@@ -281,8 +281,8 @@
 
     <script>
         "use strict";
-        const machine_id = 0;
-        function GetHardware(){
+        var machine_id = 0;
+        function GetHardware() {
             window.chrome.webview.postMessage({
                 "Type": "GET",
                 "Source": "Dashboard",
@@ -292,7 +292,7 @@
                 }
             });
         }
-        function GetMachine(){
+        function GetMachine() {
             window.chrome.webview.postMessage({
                 "Type": "GET",
                 "Source": "Dashboard",
@@ -300,7 +300,7 @@
                 "Message": {}
             });
         }
-        function SendClickEvent(target, key="left", double=false) {
+        function SendClickEvent(target, key = "left", double = false) {
             window.chrome.webview.postMessage({
                 "Type": "CLICK",
                 "Source": "Dashboard",
@@ -322,7 +322,7 @@
             });
         }
         GetMachine();
-        window.setInterval(()=>{GetHardware();}, 3000);
+        GetHardware();
 
         var CPU_Sensors = {};
         var CPU_Sensors_TimeList = [];
@@ -347,24 +347,24 @@
                 }
             });
         });
-        
+
         const main_navbar = document.querySelector("#main_navbar");
         const body = document.querySelector("body");
-        main_navbar.addEventListener("mousedown", () =>{
+        main_navbar.addEventListener("mousedown", () => {
             window.chrome.webview.postMessage({
                 "Type": "MOUSEDOWN",
                 "Target": main_navbar.id,
             });
             body.addEventListener("mousemove", MoveWindow);
         });
-        main_navbar.addEventListener("mouseup", () =>{
+        main_navbar.addEventListener("mouseup", () => {
             window.chrome.webview.postMessage({
                 "Type": "MOUSEUP",
                 "Target": main_navbar.id,
             });
             body.removeEventListener("mousemove", MoveWindow);
         });
-        main_navbar.addEventListener("dblclick", ()=>{
+        main_navbar.addEventListener("dblclick", () => {
             SendClickEvent("Nav", "left", true);
         });
 
@@ -376,17 +376,20 @@
                 toolbar: {
                     show: false,
                 },
+                sparkline: {
+                    enabled: true
+                },
                 animations: {
                     enabled: true,
                     easing: 'easeinout',
-                    speed: 800,
+                    speed: 5000,
                     animateGradually: {
                         enabled: true,
                         delay: 150
                     },
                     dynamicAnimation: {
                         enabled: true,
-                        speed: 350
+                        speed: 5000
                     }
                 },
             },
@@ -396,39 +399,52 @@
             stroke: {
                 curve: "smooth",
             },
-            series: [{data: []}],
+            series: [{ data: [] }],
             tooltip: {
                 theme: 'dark'
             },
             xaxis: {
+                labels: {
+                    padding: 0,
+                },
                 tooltip: {
                     enabled: false
                 },
+                axisBorder: {
+                    show: false,
+                },
                 type: 'datetime',
+            },
+            yaxis: {
+                max: 100
             },
             labels: [],
             legend: {
-                show: true
+                show: false
+            },
+            point: {
+                show: false
             },
         }
 
         var chart_cpu_load = new ApexCharts(document.getElementById('chart-cpu-load'), chart_cpu_load_options);
         chart_cpu_load.render();
 
-        function update_chart_cpu_load(){
-            const chart_data = [];
-            for (const[id, sensor] of Object.entries(CPU_Sensors)){
-                chart_data.push({
-                    name: [...new Set(sensor.name)].pop(),
-                    data: sensor.data.slice(-10)
-                });
-            }
-            chart_cpu_load.updateSeries(chart_data, true);
-            chart_cpu_load.updateOptions({labels: CPU_Sensors_TimeList.slice(-10)});
+        async function update_chart_cpu_load() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [id, sensor] of Object.entries(CPU_Sensors)) {
+                    chart_data.push({
+                        name: [...new Set(sensor.name)].pop(),
+                        data: sensor.data.slice(-10)
+                    });
+                }
+                chart_cpu_load.updateSeries(chart_data, true);
+                chart_cpu_load.updateOptions({ labels: CPU_Sensors_TimeList.slice(-10) });
+            });
         }
 
         window.chrome.webview.addEventListener("message", event => {
-            console.log(event);
             var data = event.data;
             switch (data.Type) {
                 case "Machine":
@@ -439,21 +455,21 @@
                 case "Hardware":
                     CPU_Sensors_TimeList.push(Date.now());
                     data.Data.Hardware.forEach(hardware => {
-                        switch(hardware.Type){
+                        switch (hardware.Type) {
                             case "Motherboard":
                                 document.querySelector("#name_motherboard").innerHTML = hardware.Name;
                                 break;
                             case "Cpu":
                                 document.querySelector("#name_cpu").innerHTML = hardware.Name;
                                 for (const [id, sensor] of Object.entries(hardware.Sensors["Load"])) {
-                                    if (!id.includes("cpu/1/load/")) continue;
-                                    if (!(id in CPU_Sensors)){
+                                    if (!(id in CPU_Sensors)) {
                                         CPU_Sensors[id] = {
                                             "name": [],
                                             "data": []
                                         };
                                     }
                                     for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "CPU Total") continue;
                                         CPU_Sensors[id]["name"].push(name);
                                         CPU_Sensors[id]["data"].push(value.Value);
                                     }
@@ -479,7 +495,7 @@
             }
         });
 
-        
+
 
     </script>
 

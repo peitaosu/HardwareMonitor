@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.PortableExecutable;
 using System.Security.Policy;
 using System.Text.Json;
+using System.Threading;
 
 namespace HardwareMonitor
 {
@@ -47,6 +48,7 @@ namespace HardwareMonitor
         {
             WebMessage message = JsonSerializer.Deserialize<WebMessage>(args.WebMessageAsJson);
             dynamic result = null;
+            long machine_id = 0;
             Database db = new Database(SettingManager.GetSetting().DatabasePath);
             switch (message.Type)
             {
@@ -54,42 +56,38 @@ namespace HardwareMonitor
                     switch (message.Target)
                     {
                         case "Hardware":
-                            result = Hardware.Instance.GetHardware();
-                            db.Connect();
-                            long machine_id = 0;
-
-                            if (result != null)
+                            if (message.Message.ContainsKey("MachineID") && message.Message["MachineID"].GetInt64() > 0)
                             {
-                                
-                                if (message.Message.ContainsKey("MachineID") && message.Message["MachineID"].GetInt64() > 0)
-                                {
-                                    machine_id = message.Message["MachineID"].GetInt64();
-                                }
-                                else
-                                {
-                                    dynamic machine = Hardware.Instance.GetMachine();
-                                    machine_id = db.GetMachine(machine.MachineName, machine.URI);
-                                    if (machine_id == null)
-                                        db.SaveMachine(machine.MachineName, machine.URI);
-                                    machine_id = db.GetMachine(machine.MachineName, machine.URI);
-                                }
-                                foreach (var hardware in result.Hardware)
-                                {
-                                    db.SaveData(hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors, SettingManager.GetSetting().JsonOptions), machine_id);
-                                }
+                                machine_id = message.Message["MachineID"].GetInt64();
                             }
-                            db.Disconnect();
-                            webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Hardware", Data = result, Machine = machine_id }));
+                            else
+                            {
+                                dynamic machine = Hardware.Instance.GetMachine();
+                                db.Connect();
+                                machine_id = db.GetMachine(machine.MachineName, machine.URI);
+                                if (machine_id == 0)
+                                    db.SaveMachine(machine.MachineName, machine.URI);
+                                machine_id = db.GetMachine(machine.MachineName, machine.URI);
+                                db.Disconnect();
+                            }
+                            var thread = new ThreadStart(() => { UpdatingHardware(db, machine_id); });
+                            var background = new Thread(thread);
+                            background.Start();
                             break;
                         case "Machine":
-                            result = Hardware.Instance.GetMachine();
-                            db.Connect();
-                            machine_id = db.GetMachine(result.MachineName, result.URI);
-                            if (machine_id == null)
-                                db.SaveMachine(result.MachineName, result.URI);
-                            machine_id = db.GetMachine(result.MachineName, result.URI);
-                            db.Disconnect();
-                            webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Machine", Data = result, Machine = machine_id }));
+                            Task.Factory.StartNew(() =>
+                            {
+                                result = Hardware.Instance.GetMachine();
+                                db.Connect();
+                                machine_id = db.GetMachine(result.MachineName, result.URI);
+                                if (machine_id == null)
+                                    db.SaveMachine(result.MachineName, result.URI);
+                                machine_id = db.GetMachine(result.MachineName, result.URI);
+                                db.Disconnect();
+                            }).ContinueWith(task =>
+                            {
+                                webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Machine", Data = result, Machine = machine_id }));
+                            }, TaskScheduler.FromCurrentSynchronizationContext());
                             break;
                         default:
                             break;
@@ -166,6 +164,35 @@ namespace HardwareMonitor
                     break;
             }
             return;
+        }
+
+        private void UpdatingHardware(Database db, long machine_id)
+        {
+
+            Thread.Sleep(5000);
+            dynamic result = Hardware.Instance.GetHardware();
+            Task.Run(() =>
+            {
+                db.Connect();
+
+                if (result != null)
+                {
+                    foreach (var hardware in result.Hardware)
+                    {
+                        db.SaveData(hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors, SettingManager.GetSetting().JsonOptions), machine_id);
+                    }
+                }
+                db.Disconnect();
+            });
+            if (IsHandleCreated)
+            {
+                webView.Invoke((MethodInvoker)delegate
+                {
+                    webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Hardware", Data = result, Machine = machine_id }));
+
+                });
+            }
+            UpdatingHardware(db, machine_id);
         }
 
         private void NavigateTo(string page, string data)

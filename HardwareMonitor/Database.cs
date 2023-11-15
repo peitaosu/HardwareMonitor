@@ -70,7 +70,7 @@ namespace HardwareMonitor
             return insert.ExecuteNonQuery() > 0;
         }
 
-        public long? GetMachine(string name, string URI)
+        public long GetMachine(string name, string URI)
         {
             var select = _connection.CreateCommand();
             // get machine id by using name and URI
@@ -84,7 +84,9 @@ namespace HardwareMonitor
             ";
             select.Parameters.AddWithValue("$Name", name);
             select.Parameters.AddWithValue("$URI", URI);
-            return (long?)select.ExecuteScalar();
+            var result = (long?)select.ExecuteScalar();
+            if (result == null) return 0;
+            return (long)result;
         }
 
         public bool SaveData(string hardware, string name, string identifier, string sensors, long machine)
