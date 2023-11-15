@@ -15,7 +15,7 @@
 <body data-bs-theme="dark">
     <div class="layout-fluid">
         <div class="page">
-            <header class="navbar navbar-expand-md sticky-top d-print-none">
+            <header id="main_navbar" class="navbar navbar-expand-md sticky-top d-print-none">
                 <div class="container-xl">
                     <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                         <i class="ti ti-heart-rate-monitor"></i> Hardware Monitor
@@ -23,22 +23,22 @@
 
                     <div class="navbar-nav flex-row order-md-last">
                         <div class="nav-item">
-                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                            <a id="dialog_mini" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-arrow-bar-down"></i>
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                            <a id="dialog_center" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-window-minimize"></i>
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                            <a id="dialog_max" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-window-maximize"></i>
                             </a>
                         </div>
                         <div class="nav-item">
-                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                            <a id="dialog_x" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-square-x"></i>
                             </a>
                         </div>
@@ -116,43 +116,22 @@
                                 </div>
                             </div>
                             <!--CPU-->
-                            <div class="col-12 col-md-4 col-xl-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/cpu.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                CPU
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    <span id="name_cpu"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col-12 col-md-8 col-xl-8">
                                 <div class="card">
                                     <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/cpu.svg" />
-                                                </span>
+                                        <div class="card-stamp">
+                                            <div class="card-stamp-icon">
+                                                <img src="image/cpu.svg" />
                                             </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                CPU
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    
-                                                </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex">
+                                              <h3 class="card-title">CPU Usage</h3>
+                                              <div class="ms-auto">
+                                                <span id="name_cpu"></span>
+                                              </div>
+                                            </div>
+                                            <div id="chart-cpu-load">
                                             </div>
                                         </div>
                                     </div>
@@ -302,35 +281,206 @@
 
     <script>
         "use strict";
-        window.chrome.webview.postMessage({
-            "Type": "GET",
-            "Source": "Dashboard",
-            "Target": "_ALL_",
-            "Message": {}
-        });
-        window.chrome.webview.addEventListener("message", event => {
-            console.log(event);
-            document.querySelector("#name_machine").innerHTML = event.data.MachineName;
-            document.querySelector("#name_ipv4").innerHTML = event.data.URI;
-            event.data.Hardware.forEach(hardware => {
-                switch(hardware.Type){
-                    case "Motherboard":
-                        document.querySelector("#name_motherboard").innerHTML = hardware.Name;
+        const machine_id = 0;
+        function GetHardware(){
+            window.chrome.webview.postMessage({
+                "Type": "GET",
+                "Source": "Dashboard",
+                "Target": "Hardware",
+                "Message": {
+                    "MachineID": machine_id
+                }
+            });
+        }
+        function GetMachine(){
+            window.chrome.webview.postMessage({
+                "Type": "GET",
+                "Source": "Dashboard",
+                "Target": "Machine",
+                "Message": {}
+            });
+        }
+        function SendClickEvent(target, key="left", double=false) {
+            window.chrome.webview.postMessage({
+                "Type": "CLICK",
+                "Source": "Dashboard",
+                "Target": target,
+                "Message": {
+                    "Double": double,
+                    "Key": key
+                }
+            });
+        }
+        function MoveWindow(event) {
+            window.chrome.webview.postMessage({
+                "Type": "MOUSEMOVE",
+                "Target": "body",
+                "Message": {
+                    "X": event.offsetX,
+                    "Y": event.offsetY
+                }
+            });
+        }
+        GetMachine();
+        window.setInterval(()=>{GetHardware();}, 3000);
+
+        var CPU_Sensors = {};
+        var CPU_Sensors_TimeList = [];
+        document.querySelectorAll(".nav-link").forEach(element => {
+            element.addEventListener("click", event => {
+                var target = event.currentTarget;
+                switch (target.id) {
+                    case "dialog_mini":
+                        SendClickEvent("Min");
                         break;
-                    case "Cpu":
-                        document.querySelector("#name_cpu").innerHTML = hardware.Name;
+                    case "dialog_center":
+                        SendClickEvent("Center");
                         break;
-                    case "Memory":
-                        document.querySelector("#name_ram").innerHTML = hardware.Name;
+                    case "dialog_max":
+                        SendClickEvent("Max");
                         break;
-                    case "GpuAmd":
-                        document.querySelector("#name_gpu").innerHTML = hardware.Name;
+                    case "dialog_x":
+                        SendClickEvent("X");
                         break;
                     default:
                         break;
                 }
             });
         });
+        
+        const main_navbar = document.querySelector("#main_navbar");
+        const body = document.querySelector("body");
+        main_navbar.addEventListener("mousedown", () =>{
+            window.chrome.webview.postMessage({
+                "Type": "MOUSEDOWN",
+                "Target": main_navbar.id,
+            });
+            body.addEventListener("mousemove", MoveWindow);
+        });
+        main_navbar.addEventListener("mouseup", () =>{
+            window.chrome.webview.postMessage({
+                "Type": "MOUSEUP",
+                "Target": main_navbar.id,
+            });
+            body.removeEventListener("mousemove", MoveWindow);
+        });
+        main_navbar.addEventListener("dblclick", ()=>{
+            SendClickEvent("Nav", "left", true);
+        });
+
+        var chart_cpu_load_options = {
+            chart: {
+                type: "area",
+                fontFamily: 'inherit',
+                height: 288,
+                toolbar: {
+                    show: false,
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800,
+                    animateGradually: {
+                        enabled: true,
+                        delay: 150
+                    },
+                    dynamicAnimation: {
+                        enabled: true,
+                        speed: 350
+                    }
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+            stroke: {
+                curve: "smooth",
+            },
+            series: [{data: []}],
+            tooltip: {
+                theme: 'dark'
+            },
+            xaxis: {
+                tooltip: {
+                    enabled: false
+                },
+                type: 'datetime',
+            },
+            labels: [],
+            legend: {
+                show: true
+            },
+        }
+
+        var chart_cpu_load = new ApexCharts(document.getElementById('chart-cpu-load'), chart_cpu_load_options);
+        chart_cpu_load.render();
+
+        function update_chart_cpu_load(){
+            const chart_data = [];
+            for (const[id, sensor] of Object.entries(CPU_Sensors)){
+                chart_data.push({
+                    name: [...new Set(sensor.name)].pop(),
+                    data: sensor.data.slice(-10)
+                });
+            }
+            chart_cpu_load.updateSeries(chart_data, true);
+            chart_cpu_load.updateOptions({labels: CPU_Sensors_TimeList.slice(-10)});
+        }
+
+        window.chrome.webview.addEventListener("message", event => {
+            console.log(event);
+            var data = event.data;
+            switch (data.Type) {
+                case "Machine":
+                    document.querySelector("#name_machine").innerHTML = data.Data.MachineName;
+                    document.querySelector("#name_ipv4").innerHTML = data.Data.URI;
+                    machine_id = data.Machine;
+                    break;
+                case "Hardware":
+                    CPU_Sensors_TimeList.push(Date.now());
+                    data.Data.Hardware.forEach(hardware => {
+                        switch(hardware.Type){
+                            case "Motherboard":
+                                document.querySelector("#name_motherboard").innerHTML = hardware.Name;
+                                break;
+                            case "Cpu":
+                                document.querySelector("#name_cpu").innerHTML = hardware.Name;
+                                for (const [id, sensor] of Object.entries(hardware.Sensors["Load"])) {
+                                    if (!id.includes("cpu/1/load/")) continue;
+                                    if (!(id in CPU_Sensors)){
+                                        CPU_Sensors[id] = {
+                                            "name": [],
+                                            "data": []
+                                        };
+                                    }
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        CPU_Sensors[id]["name"].push(name);
+                                        CPU_Sensors[id]["data"].push(value.Value);
+                                    }
+                                }
+                                break;
+                            case "Memory":
+                                document.querySelector("#name_ram").innerHTML = hardware.Name;
+                                break;
+                            case "GpuAmd":
+                                document.querySelector("#name_gpu").innerHTML = hardware.Name;
+                                break;
+                            case "GpuNvidia":
+                                document.querySelector("#name_gpu").innerHTML = hardware.Name;
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                    update_chart_cpu_load();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        
+
     </script>
 
 </body>

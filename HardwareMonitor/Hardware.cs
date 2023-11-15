@@ -71,16 +71,26 @@ namespace HardwareMonitor
             }
         }
 
-        public dynamic? GetData(string identifier = "")
+        public dynamic GetMachine()
         {
-            bool identified = !string.IsNullOrEmpty(identifier);
             string ipv4 = Utils.GetLocalIPv4(NetworkInterfaceType.Ethernet);
             dynamic result = new
             {
                 MachineName = Environment.MachineName,
-                URI = string.IsNullOrEmpty(ipv4) ? Utils.GetLocalIPv4(NetworkInterfaceType.Wireless80211) : ipv4,
+                URI = string.IsNullOrEmpty(ipv4) ? Utils.GetLocalIPv4(NetworkInterfaceType.Wireless80211) : ipv4
+            };
+            return result;
+        }
+
+        public dynamic? GetHardware(string identifier = "")
+        {
+            bool identified = !string.IsNullOrEmpty(identifier);
+
+            dynamic result = new
+            {
                 Hardware = new List<dynamic>() { }
             };
+
             if (_computer != null)
             {
                 foreach (IHardware hardware in _computer.Hardware)

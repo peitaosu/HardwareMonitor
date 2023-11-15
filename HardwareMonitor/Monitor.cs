@@ -12,11 +12,8 @@ namespace HardwareMonitor
         {
             ApplicationConfiguration.Initialize();
 
-            dynamic? result = Hardware.Instance.GetData();
-
             SettingManager.LoadFrom();
 
-            
             Application.Run(new View());
             return;
         }
