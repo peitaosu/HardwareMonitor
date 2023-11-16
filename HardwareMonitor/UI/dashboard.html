@@ -116,46 +116,40 @@
                                 </div>
                             </div>
                             <!--CPU-->
-                            <div class="col-12 col-md-8 col-xl-8">
+                            <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
-                                    <div class="card-body">
-                                        <div class="card-stamp">
-                                            <div class="card-stamp-icon">
-                                                <img src="image/cpu.svg" />
-                                            </div>
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/cpu.svg" />
                                         </div>
-                                        <div class="card-body">
-                                            <div class="d-flex">
-                                                <h3 class="card-title">CPU Usage</h3>
-                                                <div class="ms-auto">
-                                                    <span id="name_cpu"></span>
-                                                </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex">
+                                            <div class="ms-auto">
+                                                <span id="name_cpu"></span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="chart-cpu-load">
+                                    <div id="chart-cpu-overall">
                                     </div>
                                 </div>
                             </div>
                             <!--RAM-->
                             <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/ram.svg" />
+                                        </div>
+                                    </div>
                                     <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/ram.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    RAM
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    <span id="name_ram"></span>
-                                                </div>
+                                        <div class="d-flex">
+                                            <div class="ms-auto">
+                                                <span id="name_ram"></span>
                                             </div>
                                         </div>
+                                        <div id="chart-ram-used">
+                                        </div>    
                                     </div>
                                 </div>
                             </div>
@@ -282,13 +276,29 @@
     <script>
         "use strict";
         var machine_id = 0;
+        var CPU_Sensors = {};
+        var RAM_Sensors = [];
+
+        function StartMonitor() {
+            window.chrome.webview.postMessage({
+                "Type": "GET",
+                "Source": "Dashboard",
+                "Target": "Hardware",
+                "Message": {
+                    "MachineID": machine_id,
+                    "Event": "Start"
+                }
+            });
+        }
         function GetHardware() {
             window.chrome.webview.postMessage({
                 "Type": "GET",
                 "Source": "Dashboard",
                 "Target": "Hardware",
                 "Message": {
-                    "MachineID": machine_id
+                    "MachineID": machine_id,
+                    "Event": "Fetch",
+                    "Last": 10
                 }
             });
         }
@@ -322,10 +332,9 @@
             });
         }
         GetMachine();
-        GetHardware();
+        StartMonitor();
+        setInterval(GetHardware, 5000);
 
-        var CPU_Sensors = {};
-        var CPU_Sensors_TimeList = [];
         document.querySelectorAll(".nav-link").forEach(element => {
             element.addEventListener("click", event => {
                 var target = event.currentTarget;
@@ -368,11 +377,11 @@
             SendClickEvent("Nav", "left", true);
         });
 
-        var chart_cpu_load_options = {
+        var chart_cpu_overall_options = {
             chart: {
                 type: "area",
                 fontFamily: 'inherit',
-                height: 288,
+                height: 180,
                 toolbar: {
                     show: false,
                 },
@@ -380,26 +389,25 @@
                     enabled: true
                 },
                 animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 5000,
-                    animateGradually: {
-                        enabled: true,
-                        delay: 150
-                    },
-                    dynamicAnimation: {
-                        enabled: true,
-                        speed: 5000
-                    }
+                    enabled: false
+
                 },
+                toolbar: {
+                    show: false
+                },
+                zoom: {
+                    enabled: false
+                }
             },
-            fill: {
-                opacity: 1,
+            dataLabels: {
+                enabled: false
             },
             stroke: {
-                curve: "smooth",
+                curve: "straight"
             },
-            series: [{ data: [] }],
+            markers: {
+                size: 0
+            },
             tooltip: {
                 theme: 'dark'
             },
@@ -416,31 +424,71 @@
                 type: 'datetime',
             },
             yaxis: {
-                max: 100
+                max: 100,
+                min: 0
             },
-            labels: [],
+            colors: [tabler.getColor("blue"), tabler.getColor("red"), tabler.getColor("green")],
             legend: {
                 show: false
             },
-            point: {
+            series: [{ data: [] }],
+            labels: [],
+        };
+
+        var chart_ram_used_options = {
+            series: [],
+            chart: {
+                type: "donut",
+                fontFamily: 'inherit',
+                height: 180,
+                sparkline: {
+                    enabled: true
+                },
+                animations: {
+                    enabled: false
+                },
+            },
+            fill: {
+                opacity: 1,
+            },
+            labels: ["Used", "Available"],
+            tooltip: {
+                theme: 'dark'
+            },
+            grid: {
+                strokeDashArray: 4,
+            },
+            legend: {
                 show: false
             },
-        }
+            tooltip: {
+                fillSeriesColor: false
+            },
+        };
 
-        var chart_cpu_load = new ApexCharts(document.getElementById('chart-cpu-load'), chart_cpu_load_options);
-        chart_cpu_load.render();
+        var chart_cpu_overall = new ApexCharts(document.getElementById('chart-cpu-overall'), chart_cpu_overall_options);
+        chart_cpu_overall.render();
+        var chart_ram_used = new ApexCharts(document.getElementById('chart-ram-used'), chart_ram_used_options);
+        chart_ram_used.render();
 
-        async function update_chart_cpu_load() {
+        async function update_chart_cpu_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
-                for (const [id, sensor] of Object.entries(CPU_Sensors)) {
+                for (const [type, data] of Object.entries(CPU_Sensors)) {
+                    if (type == "Timeline") continue;
                     chart_data.push({
-                        name: [...new Set(sensor.name)].pop(),
-                        data: sensor.data.slice(-10)
+                        name: type,
+                        data: data
                     });
                 }
-                chart_cpu_load.updateSeries(chart_data, true);
-                chart_cpu_load.updateOptions({ labels: CPU_Sensors_TimeList.slice(-10) });
+                chart_cpu_overall.updateSeries(chart_data, true);
+                chart_cpu_overall.updateOptions({ labels: CPU_Sensors["Timeline"] });
+            });
+        }
+
+        async function update_chart_ram_used() {
+            return new Promise((resolve, reject) => {
+                chart_ram_used.updateSeries(RAM_Sensors, true);
             });
         }
 
@@ -453,30 +501,48 @@
                     machine_id = data.Machine;
                     break;
                 case "Hardware":
-                    CPU_Sensors_TimeList.push(Date.now());
-                    data.Data.Hardware.forEach(hardware => {
-                        switch (hardware.Type) {
+                    console.log(data.Data);
+                    CPU_Sensors = {
+                        "Load": [],
+                        "Temperature": [],
+                        "Timeline": []
+                    };
+                    RAM_Sensors = [];
+                    data.Data.forEach(hardware => {
+                        switch (hardware.Hardware) {
                             case "Motherboard":
                                 document.querySelector("#name_motherboard").innerHTML = hardware.Name;
                                 break;
                             case "Cpu":
+                                CPU_Sensors["Timeline"].push(hardware.Timestamp);
                                 document.querySelector("#name_cpu").innerHTML = hardware.Name;
-                                for (const [id, sensor] of Object.entries(hardware.Sensors["Load"])) {
-                                    if (!(id in CPU_Sensors)) {
-                                        CPU_Sensors[id] = {
-                                            "name": [],
-                                            "data": []
-                                        };
-                                    }
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "CPU Total") continue;
-                                        CPU_Sensors[id]["name"].push(name);
-                                        CPU_Sensors[id]["data"].push(value.Value);
+                                        CPU_Sensors["Load"].push(value.Value);
+                                    }
+                                }
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "Core (Tctl/Tdie)") continue;
+                                        CPU_Sensors["Temperature"].push(value.Value);
                                     }
                                 }
                                 break;
                             case "Memory":
                                 document.querySelector("#name_ram").innerHTML = hardware.Name;
+                                var used = 0.0;
+                                var available = 0.0;
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Data"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name == "Memory Used") {
+                                            used = value.Value;
+                                        } else if (name == "Memory Available"){
+                                            available = value.Value;
+                                        }
+                                    }
+                                }
+                                RAM_Sensors = [used, available];
                                 break;
                             case "GpuAmd":
                                 document.querySelector("#name_gpu").innerHTML = hardware.Name;
@@ -488,7 +554,8 @@
                                 break;
                         }
                     });
-                    update_chart_cpu_load();
+                    update_chart_cpu_overall();
+                    update_chart_ram_used();
                     break;
                 default:
                     break;

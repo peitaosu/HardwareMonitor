@@ -45,7 +45,7 @@ namespace HardwareMonitor
                 IsStorageEnabled = true,
             };
             _computer.Open();
-            _computer.Accept(new UpdateVisitor());
+            //_computer.Accept(new UpdateVisitor());
         }
 
         ~Hardware()

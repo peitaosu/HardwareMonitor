@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace HardwareMonitor
                 ID integer primary key autoincrement,
                 Name varchar(32),
                 URI varchar(32),
-                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                Timestamp integer
             );
             ";
             create.ExecuteNonQuery();
@@ -36,7 +37,7 @@ namespace HardwareMonitor
                 Identifier varchar(32),
                 Sensors text,
                 Machine integer,
-                Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                Timestamp integer,
                 foreign key(Machine) references Machine(ID)
             );
             ";
@@ -51,29 +52,35 @@ namespace HardwareMonitor
 
         public void Connect()
         {
-            _connection.Open();
+            if (_connection.State == System.Data.ConnectionState.Closed && _connection.State != System.Data.ConnectionState.Open)
+            {
+                _connection.Open();
+            }
         }
 
         public void Disconnect()
         {
-            _connection.Close();
+            if (_connection.State == System.Data.ConnectionState.Open)
+            {
+                _connection.Close();
+            }
         }
-        public bool SaveMachine(string name, string URI)
+        public bool SaveMachine(string name, string URI, long timestamp)
         {
             var insert = _connection.CreateCommand();
             insert.CommandText =
             @"
-            INSERT INTO Machine (Name, URI) VALUES ($Name, $URI);
+            INSERT INTO Machine (Name, URI, Timestamp) VALUES ($Name, $URI, $Timestamp);
             ";
             insert.Parameters.AddWithValue("$Name", name);
             insert.Parameters.AddWithValue("$URI", URI);
+            insert.Parameters.AddWithValue("$Timestamp", timestamp);
             return insert.ExecuteNonQuery() > 0;
         }
 
         public long GetMachine(string name, string URI)
         {
             var select = _connection.CreateCommand();
-            // get machine id by using name and URI
             select.CommandText =
             @"
             SELECT ID
@@ -89,19 +96,99 @@ namespace HardwareMonitor
             return (long)result;
         }
 
-        public bool SaveData(string hardware, string name, string identifier, string sensors, long machine)
+        public bool SaveData(string hardware, string name, string identifier, string sensors, long machine, long timestamp)
         {
             var insert = _connection.CreateCommand();
             insert.CommandText =
             @"
-            INSERT INTO Data (Hardware, Name, Identifier, Sensors, Machine) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Machine);
+            INSERT INTO Data (Hardware, Name, Identifier, Sensors, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Machine, $Timestamp);
             ";
             insert.Parameters.AddWithValue("$Hardware", hardware);
             insert.Parameters.AddWithValue("$Name", name);
             insert.Parameters.AddWithValue("$Identifier", identifier);
             insert.Parameters.AddWithValue("$Sensors", sensors);
             insert.Parameters.AddWithValue("$Machine", machine);
+            insert.Parameters.AddWithValue("$Timestamp", timestamp);
             return insert.ExecuteNonQuery() > 0;
+        }
+
+        public int SaveData(List<Tuple<string, string, string, string, long, long>> records)
+        {
+            using (var tx = _connection.BeginTransaction()){
+                var insert = _connection.CreateCommand();
+                insert.CommandText =
+                @"
+                    INSERT INTO Data (Hardware, Name, Identifier, Sensors, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Machine, $Timestamp);
+                ";
+                insert.Parameters.AddWithValue("$Hardware", null);
+                insert.Parameters.AddWithValue("$Name", null);
+                insert.Parameters.AddWithValue("$Identifier", null);
+                insert.Parameters.AddWithValue("$Sensors", null);
+                insert.Parameters.AddWithValue("$Machine", null);
+                insert.Parameters.AddWithValue("$Timestamp", null);
+
+                int result = 0;
+                foreach (var record in records)
+                {
+                    insert.Parameters["$Hardware"].Value = record.Item1;
+                    insert.Parameters["$Name"].Value = record.Item2;
+                    insert.Parameters["$Identifier"].Value = record.Item3;
+                    insert.Parameters["$Sensors"].Value = record.Item4;
+                    insert.Parameters["$Machine"].Value = record.Item5;
+                    insert.Parameters["$Timestamp"].Value = record.Item6;
+                    result += insert.ExecuteNonQuery();
+
+                }
+                tx.Commit();
+                return result;
+            }
+        }
+
+        public List<dynamic> FetchData(long machine_id, int last)
+        {
+            var select_timestamp = _connection.CreateCommand();
+            select_timestamp.CommandText =
+            @"SELECT DISTINCT Timestamp FROM Data WHERE Machine = $Machine ORDER BY Timestamp DESC LIMIT $Last;";
+            select_timestamp.Parameters.AddWithValue("$Machine", machine_id);
+            select_timestamp.Parameters.AddWithValue("$Last", last);
+            SqliteDataReader reader_timestamp = select_timestamp.ExecuteReader();
+            if (reader_timestamp.HasRows)
+            {
+                List<dynamic> data = new List<dynamic>();
+                var select_data = _connection.CreateCommand();
+                select_data.CommandText = @"SELECT * FROM Data WHERE Timestamp = $Timestamp";
+                while (reader_timestamp.Read())
+                {
+                    var timestamp = reader_timestamp.GetString(0);
+                    select_data.Parameters.Clear();
+                    select_data.Parameters.AddWithValue("$Timestamp", timestamp);
+                    using (SqliteDataReader reader_data = select_data.ExecuteReader())
+                    {
+                        if (reader_data.HasRows)
+                        {
+                            while (reader_data.Read())
+                            {
+                                data.Insert(0, new
+                                {
+                                    Hardware = reader_data.GetString(1),
+                                    Name = reader_data.GetString(2),
+                                    Identifier = reader_data.GetString(3),
+                                    Sensors = reader_data.GetString(4),
+                                    Machine = reader_data.GetInt64(5),
+                                    Timestamp = reader_data.GetInt64(6)
+                                });
+                            }
+                        }
+                    }
+
+                }
+                return data;
+            }
+            else
+            {
+                reader_timestamp.Close();
+                return null;
+            }
         }
 
     }

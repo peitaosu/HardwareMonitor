@@ -66,13 +66,27 @@ namespace HardwareMonitor
                                 db.Connect();
                                 machine_id = db.GetMachine(machine.MachineName, machine.URI);
                                 if (machine_id == 0)
-                                    db.SaveMachine(machine.MachineName, machine.URI);
+                                    db.SaveMachine(machine.MachineName, machine.URI, Utils.GetUTCTimestamp());
                                 machine_id = db.GetMachine(machine.MachineName, machine.URI);
-                                db.Disconnect();
                             }
-                            var thread = new ThreadStart(() => { UpdatingHardware(db, machine_id); });
-                            var background = new Thread(thread);
-                            background.Start();
+                            if (message.Message.ContainsKey("Event"))
+                            {
+                                if (message.Message["Event"].GetString() == "Start")
+                                {
+                                    Monitor.Instance.Stop();
+                                    Monitor.Instance.MonitorHardware(db, machine_id, 5);
+                                    Monitor.Instance.Start();
+                                    break;
+                                }
+                                if (message.Message["Event"].GetString() == "Fetch")
+                                {
+                                    if (message.Message.ContainsKey("Last"))
+                                    {
+                                        webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Hardware", Data = Monitor.Instance.FetchHardware(machine_id, message.Message["Last"].GetInt32()), Machine = machine_id }));
+                                        break;
+                                    }
+                                }
+                            }
                             break;
                         case "Machine":
                             Task.Factory.StartNew(() =>
@@ -81,9 +95,8 @@ namespace HardwareMonitor
                                 db.Connect();
                                 machine_id = db.GetMachine(result.MachineName, result.URI);
                                 if (machine_id == null)
-                                    db.SaveMachine(result.MachineName, result.URI);
+                                    db.SaveMachine(result.MachineName, result.URI, Utils.GetUTCTimestamp());
                                 machine_id = db.GetMachine(result.MachineName, result.URI);
-                                db.Disconnect();
                             }).ContinueWith(task =>
                             {
                                 webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Machine", Data = result, Machine = machine_id }));
@@ -164,35 +177,6 @@ namespace HardwareMonitor
                     break;
             }
             return;
-        }
-
-        private void UpdatingHardware(Database db, long machine_id)
-        {
-
-            Thread.Sleep(5000);
-            dynamic result = Hardware.Instance.GetHardware();
-            Task.Run(() =>
-            {
-                db.Connect();
-
-                if (result != null)
-                {
-                    foreach (var hardware in result.Hardware)
-                    {
-                        db.SaveData(hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors, SettingManager.GetSetting().JsonOptions), machine_id);
-                    }
-                }
-                db.Disconnect();
-            });
-            if (IsHandleCreated)
-            {
-                webView.Invoke((MethodInvoker)delegate
-                {
-                    webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Hardware", Data = result, Machine = machine_id }));
-
-                });
-            }
-            UpdatingHardware(db, machine_id);
         }
 
         private void NavigateTo(string page, string data)

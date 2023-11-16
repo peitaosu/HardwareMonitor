@@ -41,5 +41,10 @@ namespace HardwareMonitor
             }
             return addr;
         }
+
+        public static long GetUTCTimestamp()
+        {
+            return ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeMilliseconds();
+        }
     }
 }
