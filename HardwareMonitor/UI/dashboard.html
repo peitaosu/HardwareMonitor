@@ -112,7 +112,7 @@
                                 </div>
                             </div>
                             <!--CPU-->
-                            <div class="col-12 col-md-3 col-xl-3">
+                            <div class="col-12 col-md-2 col-xl-2">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -134,7 +134,7 @@
                                 </div>
                             </div>
                             <!--RAM-->
-                            <div class="col-12 col-md-3 col-xl-3">
+                            <div class="col-12 col-md-2 col-xl-2">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -150,13 +150,13 @@
                                                 <span id="name_ram"></span>
                                             </div>
                                         </div>
-                                        <div id="chart-ram-used">
-                                        </div>
+                                    </div>
+                                    <div id="chart-ram-used">
                                     </div>
                                 </div>
                             </div>
                             <!--GPU-->
-                            <div class="col-12 col-md-3 col-xl-3">
+                            <div class="col-12 col-md-2 col-xl-2">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -178,7 +178,7 @@
                                 </div>
                             </div>
                             <!--Network-->
-                            <div class="col-12 col-md-3 col-xl-3">
+                            <div class="col-12 col-md-2 col-xl-2">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -196,69 +196,22 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--Ethernet-->
-                            <div class="col-12 col-md-3 col-xl-3">
+                            <!--Storage Drive-->
+                            <div class="col-12 col-md-2 col-xl-2">
                                 <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/hdd.svg" />
+                                        </div>
+                                    </div>
                                     <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/port.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    Ethernet
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    $Ethernet
-                                                </div>
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                Storage
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <!--HDD-->
-                            <div class="col-12 col-md-3 col-xl-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/hdd.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    HDD
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    $HDD
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!--SSD-->
-                            <div class="col-12 col-md-3 col-xl-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/hdd.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    SSD
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    $SSD
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div id="chart-dd-usage">
                                     </div>
                                 </div>
                             </div>
@@ -277,6 +230,7 @@
         var RAM_Sensors = [];
         var GPU_Sensors = {};
         var NET_Sensors = {};
+        var STO_Sensors = {};
         function StartMonitor() {
             window.chrome.webview.postMessage({
                 "Type": "GET",
@@ -428,7 +382,7 @@
             series: [{ data: [] }],
             labels: [],
         };
-        var chart_gpu_overall_options = { ...chart_cpu_overall_options };
+        var chart_gpu_overall_options = {...chart_cpu_overall_options};
         var chart_ram_used_options = {
             series: [],
             chart: {
@@ -451,6 +405,9 @@
             },
             grid: {
                 strokeDashArray: 4,
+                padding: {
+                    bottom: 30,
+                }
             },
             legend: {
                 show: false
@@ -468,12 +425,15 @@
                 toolbar: {
                     show: false,
                 },
+                sparkline: {
+                    enabled: true
+                },
                 animations: {
                     enabled: false
                 },
             },
             dataLabels: {
-                enabled: false,
+                enabled: true,
             },
             fill: {
                 opacity: 1,
@@ -482,16 +442,16 @@
             tooltip: {
                 theme: 'dark'
             },
+            grid: {
+                show: false,
+                padding: {
+                    bottom: 0,
+                }
+            },
             xaxis: {
                 labels: {
                     show: false,
                 }
-            },
-            yaxis: {
-                labels: {
-                    padding: 4
-                },
-                min: 0
             },
             labels: [],
             colors: [tabler.getColor("blue"), tabler.getColor("green")],
@@ -499,6 +459,8 @@
                 show: false,
             },
         }
+        console.log(chart_net_overall_options);
+        var chart_dd_usage_options = {...chart_net_overall_options};
         var chart_cpu_overall = new ApexCharts(document.getElementById('chart-cpu-overall'), chart_cpu_overall_options);
         chart_cpu_overall.render();
         var chart_ram_used = new ApexCharts(document.getElementById('chart-ram-used'), chart_ram_used_options);
@@ -507,6 +469,8 @@
         chart_gpu_overall.render();
         var chart_net_overall = new ApexCharts(document.getElementById('chart-net-overall'), chart_net_overall_options);
         chart_net_overall.render();
+        var chart_dd_usage = new ApexCharts(document.getElementById('chart-dd-usage'), chart_dd_usage_options);
+        chart_dd_usage.render();
         async function update_chart_cpu_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
@@ -548,7 +512,26 @@
                     });
                 }
                 chart_net_overall.updateSeries(chart_data, true);
-                chart_net_overall.updateOptions({ labels: NET_Sensors["Name"] });
+                chart_net_overall.updateOptions({
+                    
+                    labels: NET_Sensors["Name"]
+                });
+            });
+        }
+        async function update_chart_dd_usage() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(STO_Sensors["Load"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_dd_usage.updateSeries(chart_data, true);
+                chart_dd_usage.updateOptions({
+                    chart: { stacked: true },
+                    labels: STO_Sensors["Name"]
+                });
             });
         }
         window.chrome.webview.addEventListener("message", event => {
@@ -588,6 +571,18 @@
                         "Throughput": {
                             "Upload": [],
                             "Download": []
+                        },
+                        "Name": [],
+                        "Id": []
+                    }
+                    STO_Sensors = {
+                        "Throughput": {
+                            "Read": [],
+                            "Write": []
+                        },
+                        "Load": {
+                            "Used": [],
+                            "Max": []
                         },
                         "Name": [],
                         "Id": []
@@ -644,10 +639,15 @@
                                 break;
                             case "Network":
                                 if (NET_Sensors["Id"].includes(hardware.Identifier)) break;
-                                NET_Sensors["Name"].push(hardware.Name);
                                 NET_Sensors["Id"].push(hardware.Identifier);
+                                var has_speed = false;
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Throughput"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
+                                        if (value.Value < 1 && !has_speed) {
+                                            continue;
+                                        } else {
+                                            has_speed = true;
+                                        }
                                         if (name == "Download Speed") {
                                             NET_Sensors["Throughput"]["Download"].push(parseInt(value.Value / 1000));
                                         } else if (name == "Upload Speed") {
@@ -655,6 +655,30 @@
                                         }
                                     }
                                 }
+                                if (has_speed) {
+                                    NET_Sensors["Name"].push(hardware.Name);
+                                }
+                                break;
+                            case "Storage":
+                                if (STO_Sensors["Id"].includes(hardware.Identifier)) break;
+                                STO_Sensors["Id"].push(hardware.Identifier);
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Throughput"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name == "Read Rate") {
+                                            STO_Sensors["Throughput"]["Read"].push(parseInt(value.Value));
+                                        } else if (name == "Write Speed") {
+                                            STO_Sensors["Throughput"]["Write"].push(parseInt(value.Value));
+                                        }
+                                    }
+                                }
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "Used Space") continue;
+                                        STO_Sensors["Load"]["Used"].push(parseInt(value.Value));
+                                        STO_Sensors["Load"]["Max"].push(100 - parseInt(value.Value));
+                                    }
+                                }
+                                STO_Sensors["Name"].push(hardware.Name);
                                 break;
                             default:
                                 break;
@@ -664,6 +688,7 @@
                     update_chart_ram_used();
                     update_chart_gpu_overall();
                     update_chart_net_overall();
+                    update_chart_dd_usage();
                     break;
                 default:
                     break;
