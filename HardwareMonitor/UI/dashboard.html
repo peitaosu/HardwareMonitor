@@ -1,5 +1,4 @@
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,10 +7,8 @@
     <link rel="stylesheet" href="tabler/dist/css/tabler-flags.min.css">
     <link rel="stylesheet" href="tabler-icons/tabler-icons.min.css">
     <link rel="stylesheet" href="tabler/dist/libs/apexcharts/dist/apexcharts.css">
-
     <link rel="stylesheet" href="css/custom.css">
 </head>
-
 <body data-bs-theme="dark">
     <div class="layout-fluid">
         <div class="page">
@@ -20,7 +17,6 @@
                     <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
                         <i class="ti ti-heart-rate-monitor"></i> Hardware Monitor
                     </h1>
-
                     <div class="navbar-nav flex-row order-md-last">
                         <div class="nav-item">
                             <a id="dialog_mini" href="#" class="nav-link d-flex lh-1 text-reset p-0">
@@ -124,8 +120,11 @@
                                         </div>
                                     </div>
                                     <div class="card-body">
-                                        <div class="d-flex">
-                                            <div class="ms-auto">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                CPU
+                                            </div>
+                                            <div class="font-weight-medium">
                                                 <span id="name_cpu"></span>
                                             </div>
                                         </div>
@@ -143,57 +142,57 @@
                                         </div>
                                     </div>
                                     <div class="card-body">
-                                        <div class="d-flex">
-                                            <div class="ms-auto">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                RAM
+                                            </div>
+                                            <div class="font-weight-medium">
                                                 <span id="name_ram"></span>
                                             </div>
                                         </div>
                                         <div id="chart-ram-used">
-                                        </div>    
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <!--GPU-->
                             <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/gpu.svg" />
+                                        </div>
+                                    </div>
                                     <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/gpu.svg" />
-                                                </span>
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                GPU
                                             </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    GPU
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    <span id="name_gpu"></span>
-                                                </div>
+                                            <div class="font-weight-medium">
+                                                <span id="name_gpu"></span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div id="chart-gpu-overall">
+                                    </div>
                                 </div>
                             </div>
-                            <!--FAN-->
+                            <!--Network-->
                             <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/port.svg" />
+                                        </div>
+                                    </div>
                                     <div class="card-body">
-                                        <div class="row align-items-center">
-                                            <div class="col-auto">
-                                                <span class="text-white avatar">
-                                                    <img src="image/fan.svg" />
-                                                </span>
-                                            </div>
-                                            <div class="col">
-                                                <div class="text-secondary">
-                                                    FAN
-                                                </div>
-                                                <div class="font-weight-medium">
-                                                    <span id="name_fan"></span>
-                                                </div>
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                Network
                                             </div>
                                         </div>
+                                    </div>
+                                    <div id="chart-net-overall">
                                     </div>
                                 </div>
                             </div>
@@ -269,16 +268,15 @@
             </div>
         </div>
     </div>
-
     <script src="tabler/dist/js/tabler.min.js"></script>
     <script src="tabler/dist/libs/apexcharts/dist/apexcharts.min.js"></script>
-
     <script>
         "use strict";
         var machine_id = 0;
         var CPU_Sensors = {};
         var RAM_Sensors = [];
-
+        var GPU_Sensors = {};
+        var NET_Sensors = {};
         function StartMonitor() {
             window.chrome.webview.postMessage({
                 "Type": "GET",
@@ -334,7 +332,6 @@
         GetMachine();
         StartMonitor();
         setInterval(GetHardware, 5000);
-
         document.querySelectorAll(".nav-link").forEach(element => {
             element.addEventListener("click", event => {
                 var target = event.currentTarget;
@@ -356,7 +353,6 @@
                 }
             });
         });
-
         const main_navbar = document.querySelector("#main_navbar");
         const body = document.querySelector("body");
         main_navbar.addEventListener("mousedown", () => {
@@ -376,12 +372,11 @@
         main_navbar.addEventListener("dblclick", () => {
             SendClickEvent("Nav", "left", true);
         });
-
         var chart_cpu_overall_options = {
             chart: {
                 type: "area",
                 fontFamily: 'inherit',
-                height: 180,
+                height: 150,
                 toolbar: {
                     show: false,
                 },
@@ -390,7 +385,6 @@
                 },
                 animations: {
                     enabled: false
-
                 },
                 toolbar: {
                     show: false
@@ -427,20 +421,20 @@
                 max: 100,
                 min: 0
             },
-            colors: [tabler.getColor("blue"), tabler.getColor("red"), tabler.getColor("green")],
+            colors: [tabler.getColor("green"), tabler.getColor("blue"), tabler.getColor("red")],
             legend: {
                 show: false
             },
             series: [{ data: [] }],
             labels: [],
         };
-
+        var chart_gpu_overall_options = { ...chart_cpu_overall_options };
         var chart_ram_used_options = {
             series: [],
             chart: {
                 type: "donut",
                 fontFamily: 'inherit',
-                height: 180,
+                height: 150,
                 sparkline: {
                     enabled: true
                 },
@@ -465,17 +459,58 @@
                 fillSeriesColor: false
             },
         };
-
+        var chart_net_overall_options = {
+            chart: {
+                type: "bar",
+                fontFamily: 'inherit',
+                height: 150,
+                parentHeightOffset: 0,
+                toolbar: {
+                    show: false,
+                },
+                animations: {
+                    enabled: false
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            fill: {
+                opacity: 1,
+            },
+            series: [],
+            tooltip: {
+                theme: 'dark'
+            },
+            xaxis: {
+                labels: {
+                    show: false,
+                }
+            },
+            yaxis: {
+                labels: {
+                    padding: 4
+                },
+                min: 0
+            },
+            labels: [],
+            colors: [tabler.getColor("blue"), tabler.getColor("green")],
+            legend: {
+                show: false,
+            },
+        }
         var chart_cpu_overall = new ApexCharts(document.getElementById('chart-cpu-overall'), chart_cpu_overall_options);
         chart_cpu_overall.render();
         var chart_ram_used = new ApexCharts(document.getElementById('chart-ram-used'), chart_ram_used_options);
         chart_ram_used.render();
-
+        var chart_gpu_overall = new ApexCharts(document.getElementById('chart-gpu-overall'), chart_gpu_overall_options);
+        chart_gpu_overall.render();
+        var chart_net_overall = new ApexCharts(document.getElementById('chart-net-overall'), chart_net_overall_options);
+        chart_net_overall.render();
         async function update_chart_cpu_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
-                for (const [type, data] of Object.entries(CPU_Sensors)) {
-                    if (type == "Timeline") continue;
+                for (const [type, data] of Object.entries(CPU_Sensors["Load"])) {
                     chart_data.push({
                         name: type,
                         data: data
@@ -485,13 +520,37 @@
                 chart_cpu_overall.updateOptions({ labels: CPU_Sensors["Timeline"] });
             });
         }
-
         async function update_chart_ram_used() {
             return new Promise((resolve, reject) => {
                 chart_ram_used.updateSeries(RAM_Sensors, true);
             });
         }
-
+        async function update_chart_gpu_overall() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(GPU_Sensors["Load"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_gpu_overall.updateSeries(chart_data, true);
+                chart_gpu_overall.updateOptions({ labels: GPU_Sensors["Timeline"] });
+            });
+        }
+        async function update_chart_net_overall() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(NET_Sensors["Throughput"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_net_overall.updateSeries(chart_data, true);
+                chart_net_overall.updateOptions({ labels: NET_Sensors["Name"] });
+            });
+        }
         window.chrome.webview.addEventListener("message", event => {
             var data = event.data;
             switch (data.Type) {
@@ -503,11 +562,36 @@
                 case "Hardware":
                     console.log(data.Data);
                     CPU_Sensors = {
-                        "Load": [],
-                        "Temperature": [],
+                        "Load": {
+                            "Utilization": [],
+                            "Max": [],
+                        },
+                        "Temperature": {
+                            "Value": [],
+                            "Max": []
+                        },
                         "Timeline": []
                     };
                     RAM_Sensors = [];
+                    GPU_Sensors = {
+                        "Load": {
+                            "Utilization": [],
+                            "Max": [],
+                        },
+                        "Temperature": {
+                            "Value": [],
+                            "Max": []
+                        },
+                        "Timeline": []
+                    };
+                    NET_Sensors = {
+                        "Throughput": {
+                            "Upload": [],
+                            "Download": []
+                        },
+                        "Name": [],
+                        "Id": []
+                    }
                     data.Data.forEach(hardware => {
                         switch (hardware.Hardware) {
                             case "Motherboard":
@@ -519,13 +603,15 @@
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "CPU Total") continue;
-                                        CPU_Sensors["Load"].push(value.Value);
+                                        CPU_Sensors["Load"]["Utilization"].push(value.Value);
+                                        CPU_Sensors["Load"]["Max"].push(value.Max);
                                     }
                                 }
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "Core (Tctl/Tdie)") continue;
-                                        CPU_Sensors["Temperature"].push(value.Value);
+                                        CPU_Sensors["Temperature"]["Value"].push(value.Value);
+                                        CPU_Sensors["Temperature"]["Max"].push(value.Max);
                                     }
                                 }
                                 break;
@@ -537,7 +623,7 @@
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name == "Memory Used") {
                                             used = value.Value;
-                                        } else if (name == "Memory Available"){
+                                        } else if (name == "Memory Available") {
                                             available = value.Value;
                                         }
                                     }
@@ -545,10 +631,30 @@
                                 RAM_Sensors = [used, available];
                                 break;
                             case "GpuAmd":
-                                document.querySelector("#name_gpu").innerHTML = hardware.Name;
-                                break;
                             case "GpuNvidia":
                                 document.querySelector("#name_gpu").innerHTML = hardware.Name;
+                                GPU_Sensors["Timeline"].push(hardware.Timestamp);
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "GPU Core") continue;
+                                        GPU_Sensors["Load"]["Utilization"].push(value.Value);
+                                        GPU_Sensors["Load"]["Max"].push(value.Max);
+                                    }
+                                }
+                                break;
+                            case "Network":
+                                if (NET_Sensors["Id"].includes(hardware.Identifier)) break;
+                                NET_Sensors["Name"].push(hardware.Name);
+                                NET_Sensors["Id"].push(hardware.Identifier);
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Throughput"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name == "Download Speed") {
+                                            NET_Sensors["Throughput"]["Download"].push(parseInt(value.Value / 1000));
+                                        } else if (name == "Upload Speed") {
+                                            NET_Sensors["Throughput"]["Upload"].push(parseInt(value.Value / 1000));
+                                        }
+                                    }
+                                }
                                 break;
                             default:
                                 break;
@@ -556,16 +662,13 @@
                     });
                     update_chart_cpu_overall();
                     update_chart_ram_used();
+                    update_chart_gpu_overall();
+                    update_chart_net_overall();
                     break;
                 default:
                     break;
             }
         });
-
-
-
     </script>
-
 </body>
-
 </html>

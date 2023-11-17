@@ -4,3 +4,7 @@
 .navbar-nav .ti {
     font-size: 1.75em;
 }
+
+.card-stamp-icon {
+    background: none !important
+}
