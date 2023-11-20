@@ -1,20 +1,18 @@
 using Microsoft.Web.WebView2.Core;
-using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
-using System.Security.Policy;
 using System.Text.Json;
-using System.Threading;
 
 namespace HardwareMonitor
 {
     public partial class View : Form
     {
         private int _minX = 1280;
+        private int _minX_stack = 480;
         private int _minY = 800;
         private bool _dragging = false;
         private Point _dragcursor;
         private Point _dragfrom;
+        private Database db;
 
         public View()
         {
@@ -26,6 +24,7 @@ namespace HardwareMonitor
             webView.Size = this.ClientSize;
             this.CenterToScreen();
             InitializeAsync();
+            db = new Database(SettingManager.GetSetting().DatabasePath);
         }
 
         private void ResizeForm(object sender, EventArgs e)
@@ -49,7 +48,7 @@ namespace HardwareMonitor
             WebMessage message = JsonSerializer.Deserialize<WebMessage>(args.WebMessageAsJson);
             dynamic result = null;
             long machine_id = 0;
-            Database db = new Database(SettingManager.GetSetting().DatabasePath);
+            
             switch (message.Type)
             {
                 case "GET":
@@ -63,7 +62,6 @@ namespace HardwareMonitor
                             else
                             {
                                 dynamic machine = Hardware.Instance.GetMachine();
-                                db.Connect();
                                 machine_id = db.GetMachine(machine.MachineName, machine.URI);
                                 if (machine_id == 0)
                                     db.SaveMachine(machine.MachineName, machine.URI, Utils.GetUTCTimestamp());
@@ -92,7 +90,6 @@ namespace HardwareMonitor
                             Task.Factory.StartNew(() =>
                             {
                                 result = Hardware.Instance.GetMachine();
-                                db.Connect();
                                 machine_id = db.GetMachine(result.MachineName, result.URI);
                                 if (machine_id == null)
                                     db.SaveMachine(result.MachineName, result.URI, Utils.GetUTCTimestamp());
@@ -100,6 +97,21 @@ namespace HardwareMonitor
                             }).ContinueWith(task =>
                             {
                                 webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "Machine", Data = result, Machine = machine_id }));
+                            }, TaskScheduler.FromCurrentSynchronizationContext());
+                            break;
+                        case "SMBios":
+                            Task.Factory.StartNew(() => 
+                            {
+                                result = Hardware.Instance.GetSMBios();
+                                if (!message.Message.ContainsKey("MachineID"))
+                                {
+                                    //TODO - handle it
+                                }
+                                machine_id = message.Message["MachineID"].GetInt64();
+                                db.SaveBIOS(JsonSerializer.Serialize(result), machine_id, Utils.GetUTCTimestamp());
+                            }).ContinueWith(task =>
+                            {
+                                webView.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(new { Type = "SMBios", Data = result, Machine = machine_id }));
                             }, TaskScheduler.FromCurrentSynchronizationContext());
                             break;
                         default:
@@ -116,6 +128,13 @@ namespace HardwareMonitor
                             this.WindowState = FormWindowState.Maximized;
                             break;
                         case "Center":
+                            this.MinimumSize = new System.Drawing.Size(this._minX, this._minY);
+                            this.Size = new System.Drawing.Size(this._minX, this._minY);
+                            this.WindowState = FormWindowState.Normal;
+                            break;
+                        case "Stack":
+                            this.MinimumSize = new System.Drawing.Size(this._minX_stack, this._minY);
+                            this.Size = new System.Drawing.Size(this._minX_stack, this._minY);
                             this.WindowState = FormWindowState.Normal;
                             break;
                         case "Min":

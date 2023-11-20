@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 
 namespace HardwareMonitor
 {
@@ -30,6 +24,17 @@ namespace HardwareMonitor
             create.ExecuteNonQuery();
             create.CommandText =
             @"
+            CREATE TABLE IF NOT EXISTS BIOS (
+                ID integer primary key autoincrement,
+                BIOS text,
+                Machine integer,
+                Timestamp integer,
+                foreign key(Machine) references Machine(ID)
+            );
+            ";
+            create.ExecuteNonQuery();
+            create.CommandText =
+            @"
             CREATE TABLE IF NOT EXISTS Data (
                 ID integer primary key autoincrement,
                 Hardware varchar(16),
@@ -42,7 +47,6 @@ namespace HardwareMonitor
             );
             ";
             create.ExecuteNonQuery();
-            _connection.Close();
         }
 
         ~Database()
@@ -67,6 +71,7 @@ namespace HardwareMonitor
         }
         public bool SaveMachine(string name, string URI, long timestamp)
         {
+            Connect();
             var insert = _connection.CreateCommand();
             insert.CommandText =
             @"
@@ -80,6 +85,7 @@ namespace HardwareMonitor
 
         public long GetMachine(string name, string URI)
         {
+            Connect();
             var select = _connection.CreateCommand();
             select.CommandText =
             @"
@@ -96,8 +102,9 @@ namespace HardwareMonitor
             return (long)result;
         }
 
-        public bool SaveData(string hardware, string name, string identifier, string sensors, long machine, long timestamp)
+        public bool SaveHardware(string hardware, string name, string identifier, string sensors, long machine, long timestamp)
         {
+            Connect();
             var insert = _connection.CreateCommand();
             insert.CommandText =
             @"
@@ -112,8 +119,9 @@ namespace HardwareMonitor
             return insert.ExecuteNonQuery() > 0;
         }
 
-        public int SaveData(List<Tuple<string, string, string, string, long, long>> records)
+        public int SaveHardware(List<Tuple<string, string, string, string, long, long>> records)
         {
+            Connect();
             using (var tx = _connection.BeginTransaction()){
                 var insert = _connection.CreateCommand();
                 insert.CommandText =
@@ -144,8 +152,23 @@ namespace HardwareMonitor
             }
         }
 
+        public bool SaveBIOS(string BIOS, long machine_id, long timestamp)
+        {
+            Connect();
+            var insert = _connection.CreateCommand();
+            insert.CommandText =
+            @"
+            INSERT OR REPLACE INTO BIOS (ID, BIOS, Machine, Timestamp) VALUES ((SELECT ID from BIOS where Machine = $Machine), $BIOS, $Machine, $Timestamp);
+            ";
+            insert.Parameters.AddWithValue("$BIOS", BIOS);
+            insert.Parameters.AddWithValue("$Machine", machine_id);
+            insert.Parameters.AddWithValue("$Timestamp", timestamp);
+            return insert.ExecuteNonQuery() > 0;
+        }
+
         public List<dynamic> FetchData(long machine_id, int last)
         {
+            Connect();
             var select_timestamp = _connection.CreateCommand();
             select_timestamp.CommandText =
             @"SELECT DISTINCT Timestamp FROM Data WHERE Machine = $Machine ORDER BY Timestamp DESC LIMIT $Last;";

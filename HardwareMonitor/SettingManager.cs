@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
-using System.Dynamic;
-using System.Security.Principal;
-using System.Xml;
 using System.Reflection;
 
 namespace HardwareMonitor

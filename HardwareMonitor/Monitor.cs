@@ -41,7 +41,6 @@ namespace HardwareMonitor
             if (!_running) return;
             dynamic result = Hardware.Instance.GetHardware();
             long timestamp = Utils.GetUTCTimestamp();
-            _database.Connect();
 
             if (result != null)
             {
@@ -50,10 +49,10 @@ namespace HardwareMonitor
                 foreach (var hardware in result.Hardware)
                 {
                     records.Add(new Tuple<string, string, string, string, long, long>(
-                        hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors, SettingManager.GetSetting().JsonOptions), _machine_id, timestamp
+                        hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors), _machine_id, timestamp
                     ));
                 }
-                _database.SaveData(records);
+                _database.SaveHardware(records);
             }
         }
 
@@ -80,7 +79,6 @@ namespace HardwareMonitor
 
         public List<dynamic> FetchHardware(long machine_id, int last)
         {
-            _database.Connect();
             var result = _database.FetchData(machine_id, last);
             return result;
         }

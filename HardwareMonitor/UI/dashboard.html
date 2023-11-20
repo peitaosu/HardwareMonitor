@@ -24,6 +24,11 @@
                             </a>
                         </div>
                         <div class="nav-item">
+                            <a id="dialog_stack" href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-align-box-left-stretch"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
                             <a id="dialog_center" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-window-minimize"></i>
                             </a>
@@ -89,23 +94,43 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--Motherboard-->
+                            <!--BIOS-->
                             <div class="col-12 col-md-4 col-xl-4">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="row align-items-center">
                                             <div class="col-auto">
                                                 <span class="text-white avatar">
-                                                    <img src="image/motherboard.svg" />
+                                                    <img src="image/bios.svg" />
                                                 </span>
                                             </div>
                                             <div class="col">
                                                 <div class="text-secondary">
-                                                    Motherboard
+                                                    BIOS
                                                 </div>
                                                 <div class="font-weight-medium">
-                                                    <span id="name_motherboard"></span>
+                                                    <span id="info_bios"></span>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Motherboard-->
+                            <div class="col-12 col-md-2 col-xl-2">
+                                <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <img src="image/motherboard.svg" />
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                Motherboard
+                                            </div>
+                                            <div class="font-weight-medium">
+                                                <span id="info_motherboard"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -262,6 +287,16 @@
                 "Message": {}
             });
         }
+        function GetSMBios() {
+            window.chrome.webview.postMessage({
+                "Type": "GET",
+                "Source": "Dashboard",
+                "Target": "SMBios",
+                "Message": {
+                    "MachineID": machine_id
+                }
+            });
+        }
         function SendClickEvent(target, key = "left", double = false) {
             window.chrome.webview.postMessage({
                 "Type": "CLICK",
@@ -292,6 +327,9 @@
                 switch (target.id) {
                     case "dialog_mini":
                         SendClickEvent("Min");
+                        break;
+                    case "dialog_stack":
+                        SendClickEvent("Stack");
                         break;
                     case "dialog_center":
                         SendClickEvent("Center");
@@ -459,7 +497,6 @@
                 show: false,
             },
         }
-        console.log(chart_net_overall_options);
         var chart_dd_usage_options = {...chart_net_overall_options};
         var chart_cpu_overall = new ApexCharts(document.getElementById('chart-cpu-overall'), chart_cpu_overall_options);
         chart_cpu_overall.render();
@@ -541,6 +578,11 @@
                     document.querySelector("#name_machine").innerHTML = data.Data.MachineName;
                     document.querySelector("#name_ipv4").innerHTML = data.Data.URI;
                     machine_id = data.Machine;
+                    GetSMBios();
+                    break;
+                case "SMBios":
+                    document.querySelector("#info_bios").innerHTML = `${data.Data.SMBios.System.ManufacturerName} ${data.Data.SMBios.System.ProductName} SN: ${data.Data.SMBios.System.SerialNumber}<br/>`;
+                    document.querySelector("#info_motherboard").innerHTML = `${data.Data.SMBios.Board.ManufacturerName}<br/>${data.Data.SMBios.Board.ProductName}<br/>SN: ${data.Data.SMBios.Board.SerialNumber}<br/>`;
                     break;
                 case "Hardware":
                     console.log(data.Data);
@@ -582,7 +624,7 @@
                         },
                         "Load": {
                             "Used": [],
-                            "Max": []
+                            "Available": []
                         },
                         "Name": [],
                         "Id": []
@@ -590,7 +632,6 @@
                     data.Data.forEach(hardware => {
                         switch (hardware.Hardware) {
                             case "Motherboard":
-                                document.querySelector("#name_motherboard").innerHTML = hardware.Name;
                                 break;
                             case "Cpu":
                                 CPU_Sensors["Timeline"].push(hardware.Timestamp);
@@ -675,7 +716,7 @@
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "Used Space") continue;
                                         STO_Sensors["Load"]["Used"].push(parseInt(value.Value));
-                                        STO_Sensors["Load"]["Max"].push(100 - parseInt(value.Value));
+                                        STO_Sensors["Load"]["Available"].push(100 - parseInt(value.Value));
                                     }
                                 }
                                 STO_Sensors["Name"].push(hardware.Name);

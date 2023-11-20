@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+﻿using System.Net.NetworkInformation;
 using LibreHardwareMonitor.Hardware;
 
 namespace HardwareMonitor
@@ -82,6 +76,11 @@ namespace HardwareMonitor
             return result;
         }
 
+        public dynamic GetSMBios()
+        {
+            return new { SMBios = _computer.SMBios };
+        }
+
         public dynamic? GetHardware(string identifier = "")
         {
             bool identified = !string.IsNullOrEmpty(identifier);
@@ -95,6 +94,7 @@ namespace HardwareMonitor
             {
                 foreach (IHardware hardware in _computer.Hardware)
                 {
+                    hardware.Update();
                     dynamic hardware_data = new
                     {
                         Type = hardware.HardwareType.ToString(),
@@ -103,9 +103,9 @@ namespace HardwareMonitor
                         Sensors = new Dictionary<string, Dictionary<string, Dictionary<string, dynamic>>>() { },
                         SubHardwares = new List<dynamic>() { },
                     };
-                    hardware.Update();
                     foreach (IHardware subhardware in hardware.SubHardware)
                     {
+                        subhardware.Update();
                         dynamic subhardware_data = new
                         {
                             Type = subhardware.HardwareType.ToString(),
@@ -113,7 +113,6 @@ namespace HardwareMonitor
                             Identifier = subhardware.Identifier.ToString(),
                             Sensors = new Dictionary<string, Dictionary<string, Dictionary<string, dynamic>>>() { },
                         };
-                        subhardware.Update();
 
                         foreach (ISensor sensor in subhardware.Sensors)
                         {
