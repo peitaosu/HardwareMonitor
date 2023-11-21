@@ -24,6 +24,11 @@
                             </a>
                         </div>
                         <div class="nav-item">
+                            <a id="dialog_pin" href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-pin"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
                             <a id="dialog_opacity" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-texture"></i>
                             </a>
@@ -335,6 +340,9 @@
                     case "dialog_mini":
                         SendClickEvent("Min");
                         break;
+                    case "dialog_pin":
+                        SendClickEvent("Pin");
+                        break;
                     case "dialog_opacity":
                         SendClickEvent("Opacity");
                         break;
@@ -354,6 +362,10 @@
                         break;
                 }
             });
+        });
+        document.querySelector("#dialog_pin i").addEventListener("click", event=>{
+            event.currentTarget.classList.toggle("ti-pin");
+            event.currentTarget.classList.toggle("ti-pinned-filled");
         });
         const main_navbar = document.querySelector("#main_navbar");
         const body = document.querySelector("body");

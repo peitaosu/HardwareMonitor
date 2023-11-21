@@ -150,6 +150,16 @@ namespace HardwareMonitor
                                 this.Opacity = this._opacity;
                             }
                             break;
+                        case "Pin":
+                            if (this.TopMost)
+                            {
+                                this.TopMost = false;
+                            }
+                            else
+                            {
+                                this.TopMost = true;
+                            }
+                            break;
                         case "Min":
                             this.WindowState = FormWindowState.Minimized;
                             break;
