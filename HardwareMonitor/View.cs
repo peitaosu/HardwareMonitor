@@ -9,6 +9,8 @@ namespace HardwareMonitor
         private int _minX = 1280;
         private int _minX_stack = 480;
         private int _minY = 800;
+        private double _opacity = 1.0;
+        private double _opacity_changed = 0.8;
         private bool _dragging = false;
         private Point _dragcursor;
         private Point _dragfrom;
@@ -21,6 +23,7 @@ namespace HardwareMonitor
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MinimumSize = new System.Drawing.Size(this._minX, this._minY);
             this.Size = this.MinimumSize;
+            this.Opacity = this._opacity;
             webView.Size = this.ClientSize;
             this.CenterToScreen();
             InitializeAsync();
@@ -136,6 +139,16 @@ namespace HardwareMonitor
                             this.MinimumSize = new System.Drawing.Size(this._minX_stack, this._minY);
                             this.Size = new System.Drawing.Size(this._minX_stack, this._minY);
                             this.WindowState = FormWindowState.Normal;
+                            break;
+                        case "Opacity":
+                            if (this.Opacity == this._opacity)
+                            {
+                                this.Opacity = this._opacity_changed;
+                            }
+                            else
+                            {
+                                this.Opacity = this._opacity;
+                            }
                             break;
                         case "Min":
                             this.WindowState = FormWindowState.Minimized;

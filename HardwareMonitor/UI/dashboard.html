@@ -24,6 +24,11 @@
                             </a>
                         </div>
                         <div class="nav-item">
+                            <a id="dialog_opacity" href="#" class="nav-link d-flex lh-1 text-reset p-0">
+                                <i class="ti ti-texture"></i>
+                            </a>
+                        </div>
+                        <div class="nav-item">
                             <a id="dialog_stack" href="#" class="nav-link d-flex lh-1 text-reset p-0">
                                 <i class="ti ti-align-box-left-stretch"></i>
                             </a>
@@ -321,6 +326,7 @@
         }
         GetMachine();
         StartMonitor();
+        GetHardware();
         setInterval(GetHardware, 5000);
         document.querySelectorAll(".nav-link").forEach(element => {
             element.addEventListener("click", event => {
@@ -328,6 +334,9 @@
                 switch (target.id) {
                     case "dialog_mini":
                         SendClickEvent("Min");
+                        break;
+                    case "dialog_opacity":
+                        SendClickEvent("Opacity");
                         break;
                     case "dialog_stack":
                         SendClickEvent("Stack");
