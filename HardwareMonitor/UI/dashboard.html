@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="tabler/dist/css/tabler-flags.min.css">
     <link rel="stylesheet" href="tabler-icons/tabler-icons.min.css">
     <link rel="stylesheet" href="tabler/dist/libs/apexcharts/dist/apexcharts.css">
+    <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/custom.css">
 </head>
 <body data-bs-theme="dark">
@@ -67,7 +68,7 @@
                                         <div class="row align-items-center">
                                             <div class="col-auto">
                                                 <span class="text-white avatar">
-                                                    <img src="image/machine.svg" />
+                                                    <i class="bi bi-laptop"></i>
                                                 </span>
                                             </div>
                                             <div class="col">
@@ -89,7 +90,7 @@
                                         <div class="row align-items-center">
                                             <div class="col-auto">
                                                 <span class="text-white avatar">
-                                                    <img src="image/ip.svg" />
+                                                    <i class="bi bi-geo-alt"></i>
                                                 </span>
                                             </div>
                                             <div class="col">
@@ -111,7 +112,7 @@
                                         <div class="row align-items-center">
                                             <div class="col-auto">
                                                 <span class="text-white avatar">
-                                                    <img src="image/bios.svg" />
+                                                    <i class="bi bi-motherboard"></i>
                                                 </span>
                                             </div>
                                             <div class="col">
@@ -131,7 +132,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/motherboard.svg" />
+                                            <i class="bi bi-motherboard"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -151,7 +152,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/cpu.svg" />
+                                            <i class="bi bi-cpu"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -173,7 +174,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/ram.svg" />
+                                            <i class="bi bi-memory"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -195,7 +196,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/gpu.svg" />
+                                            <i class="bi bi-gpu-card"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -217,7 +218,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/port.svg" />
+                                            <i class="bi bi-ethernet"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -236,7 +237,7 @@
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
-                                            <img src="image/hdd.svg" />
+                                            <i class="bi bi-device-hdd"></i>
                                         </div>
                                     </div>
                                     <div class="card-body">
@@ -603,8 +604,8 @@
                     GetSMBios();
                     break;
                 case "SMBios":
-                    document.querySelector("#info_bios").innerHTML = `${data.Data.SMBios.System.ManufacturerName} ${data.Data.SMBios.System.ProductName} SN: ${data.Data.SMBios.System.SerialNumber}<br/>`;
-                    document.querySelector("#info_motherboard").innerHTML = `${data.Data.SMBios.Board.ManufacturerName}<br/>${data.Data.SMBios.Board.ProductName}<br/>SN: ${data.Data.SMBios.Board.SerialNumber}<br/>`;
+                    document.querySelector("#info_bios").innerHTML = `${data.Data.SMBios.System.ManufacturerName} ${data.Data.SMBios.System.ProductName}<br/>`;
+                    document.querySelector("#info_motherboard").innerHTML = `${data.Data.SMBios.Board.ManufacturerName}<br/>${data.Data.SMBios.Board.ProductName}<br/><br/>SN: ${data.Data.SMBios.Board.SerialNumber}<br/>`;
                     break;
                 case "Hardware":
                     console.log(data.Data);
