@@ -9,6 +9,7 @@ namespace HardwareMonitor
         private int _minX = 1280;
         private int _minX_stack = 480;
         private int _minY = 800;
+        private int _minY_stack = 1080;
         private double _opacity = 1.0;
         private double _opacity_changed = 0.8;
         private bool _dragging = false;
@@ -134,11 +135,13 @@ namespace HardwareMonitor
                             this.MinimumSize = new System.Drawing.Size(this._minX, this._minY);
                             this.Size = new System.Drawing.Size(this._minX, this._minY);
                             this.WindowState = FormWindowState.Normal;
+                            this.CenterToScreen();
                             break;
                         case "Stack":
-                            this.MinimumSize = new System.Drawing.Size(this._minX_stack, this._minY);
-                            this.Size = new System.Drawing.Size(this._minX_stack, this._minY);
+                            this.MinimumSize = new System.Drawing.Size(this._minX_stack, this._minY_stack);
+                            this.Size = new System.Drawing.Size(this._minX_stack, this._minY_stack);
                             this.WindowState = FormWindowState.Normal;
+                            this.CenterToScreen();
                             break;
                         case "Opacity":
                             if (this.Opacity == this._opacity)
