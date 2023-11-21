@@ -91,7 +91,7 @@ namespace HardwareMonitor
                             {
                                 result = Hardware.Instance.GetMachine();
                                 machine_id = db.GetMachine(result.MachineName, result.URI);
-                                if (machine_id == null)
+                                if (machine_id == 0)
                                     db.SaveMachine(result.MachineName, result.URI, Utils.GetUTCTimestamp());
                                 machine_id = db.GetMachine(result.MachineName, result.URI);
                             }).ContinueWith(task =>

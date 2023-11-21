@@ -41,6 +41,7 @@ namespace HardwareMonitor
                 Name varchar(32),
                 Identifier varchar(32),
                 Sensors text,
+                Parent varchar(32),
                 Machine integer,
                 Timestamp integer,
                 foreign key(Machine) references Machine(ID)
@@ -102,36 +103,38 @@ namespace HardwareMonitor
             return (long)result;
         }
 
-        public bool SaveHardware(string hardware, string name, string identifier, string sensors, long machine, long timestamp)
+        public bool SaveHardware(string hardware, string name, string identifier, string sensors, string parent, long machine, long timestamp)
         {
             Connect();
             var insert = _connection.CreateCommand();
             insert.CommandText =
             @"
-            INSERT INTO Data (Hardware, Name, Identifier, Sensors, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Machine, $Timestamp);
+            INSERT INTO Data (Hardware, Name, Identifier, Sensors, Parent, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Parent, $Machine, $Timestamp);
             ";
             insert.Parameters.AddWithValue("$Hardware", hardware);
             insert.Parameters.AddWithValue("$Name", name);
             insert.Parameters.AddWithValue("$Identifier", identifier);
             insert.Parameters.AddWithValue("$Sensors", sensors);
+            insert.Parameters.AddWithValue("$Parent", parent);
             insert.Parameters.AddWithValue("$Machine", machine);
             insert.Parameters.AddWithValue("$Timestamp", timestamp);
             return insert.ExecuteNonQuery() > 0;
         }
 
-        public int SaveHardware(List<Tuple<string, string, string, string, long, long>> records)
+        public int SaveHardware(List<Tuple<string, string, string, string, string, long, long>> records)
         {
             Connect();
             using (var tx = _connection.BeginTransaction()){
                 var insert = _connection.CreateCommand();
                 insert.CommandText =
                 @"
-                    INSERT INTO Data (Hardware, Name, Identifier, Sensors, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Machine, $Timestamp);
+                    INSERT INTO Data (Hardware, Name, Identifier, Sensors, Parent, Machine, Timestamp) VALUES ($Hardware, $Name, $Identifier, $Sensors, $Parent, $Machine, $Timestamp);
                 ";
                 insert.Parameters.AddWithValue("$Hardware", null);
                 insert.Parameters.AddWithValue("$Name", null);
                 insert.Parameters.AddWithValue("$Identifier", null);
                 insert.Parameters.AddWithValue("$Sensors", null);
+                insert.Parameters.AddWithValue("$Parent", null);
                 insert.Parameters.AddWithValue("$Machine", null);
                 insert.Parameters.AddWithValue("$Timestamp", null);
 
@@ -142,8 +145,9 @@ namespace HardwareMonitor
                     insert.Parameters["$Name"].Value = record.Item2;
                     insert.Parameters["$Identifier"].Value = record.Item3;
                     insert.Parameters["$Sensors"].Value = record.Item4;
-                    insert.Parameters["$Machine"].Value = record.Item5;
-                    insert.Parameters["$Timestamp"].Value = record.Item6;
+                    insert.Parameters["$Parent"].Value = record.Item5;
+                    insert.Parameters["$Machine"].Value = record.Item6;
+                    insert.Parameters["$Timestamp"].Value = record.Item7;
                     result += insert.ExecuteNonQuery();
 
                 }
@@ -197,8 +201,9 @@ namespace HardwareMonitor
                                     Name = reader_data.GetString(2),
                                     Identifier = reader_data.GetString(3),
                                     Sensors = reader_data.GetString(4),
-                                    Machine = reader_data.GetInt64(5),
-                                    Timestamp = reader_data.GetInt64(6)
+                                    Parent = reader_data.GetString(5),
+                                    Machine = reader_data.GetInt64(6),
+                                    Timestamp = reader_data.GetInt64(7)
                                 });
                             }
                         }

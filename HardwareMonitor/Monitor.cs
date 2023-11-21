@@ -44,13 +44,19 @@ namespace HardwareMonitor
 
             if (result != null)
             {
-                List<Tuple<string, string, string, string, long, long>> records = new List<Tuple<string, string, string, string, long, long>>();
+                List<Tuple<string, string, string, string, string, long, long>> records = new List<Tuple<string, string, string, string, string, long, long>>();
                     
                 foreach (var hardware in result.Hardware)
                 {
-                    records.Add(new Tuple<string, string, string, string, long, long>(
-                        hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors), _machine_id, timestamp
+                    records.Add(new Tuple<string, string, string, string, string, long, long>(
+                        hardware.Type, hardware.Name, hardware.Identifier, JsonSerializer.Serialize(hardware.Sensors), "", _machine_id, timestamp
                     ));
+                    foreach (var subhardware in hardware.SubHardwares)
+                    {
+                        records.Add(new Tuple<string, string, string, string, string, long, long>(
+                            subhardware.Type, subhardware.Name, subhardware.Identifier, JsonSerializer.Serialize(subhardware.Sensors), hardware.Identifier, _machine_id, timestamp
+                        ));
+                    }
                 }
                 _database.SaveHardware(records);
             }
