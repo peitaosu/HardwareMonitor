@@ -251,6 +251,64 @@
                                     </div>
                                 </div>
                             </div>
+                            <!--CPU-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <i class="bi bi-thermometer-sun"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                CPU Temperature
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="chart-cpu-temp">
+                                    </div>
+                                </div>
+                            </div>
+                            <!--GPU-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <i class="bi bi-thermometer-sun"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                GPU Temperature
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="chart-gpu-temp">
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Storage Drive-->
+                            <div class="col-12 col-md-4 col-xl-4">
+                                <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <i class="bi bi-thermometer-sun"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                Storage Temperature
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="chart-dd-temp">
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -520,6 +578,66 @@
                 show: false,
             },
         }
+        var chart_cpu_temp_options = {
+            series: [],
+            chart: {
+                height: 240,
+                type: 'heatmap',
+                fontFamily: 'inherit',
+                toolbar: {
+                    show: false,
+                },
+                sparkline: {
+                    enabled: true
+                },
+                animations: {
+                    enabled: false
+                },
+            },
+            plotOptions: {
+                heatmap: {
+                    shadeIntensity: 0.5,
+                    radius: 0,
+                    useFillColorAsStroke: true,
+                    colorScale: {
+                        ranges: [{
+                            from: 0,
+                            to: 40,
+                            name: 'low',
+                            color: tabler.getColor("green")
+                        },
+                        {
+                            from: 41,
+                            to: 60,
+                            name: 'medium',
+                            color: tabler.getColor("blue")
+                        },
+                        {
+                            from: 61,
+                            to: 80,
+                            name: 'high',
+                            color: tabler.getColor("yellow")
+                        },
+                        {
+                            from: 81,
+                            to: 100,
+                            name: 'extreme',
+                            color: tabler.getColor("red")
+                        }
+                        ]
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'dark'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                width: 1
+            }
+        }
         var chart_dd_usage_options = {...chart_net_overall_options};
         var chart_cpu_overall = new ApexCharts(document.getElementById('chart-cpu-overall'), chart_cpu_overall_options);
         chart_cpu_overall.render();
@@ -531,6 +649,14 @@
         chart_net_overall.render();
         var chart_dd_usage = new ApexCharts(document.getElementById('chart-dd-usage'), chart_dd_usage_options);
         chart_dd_usage.render();
+        var chart_cpu_temp = new ApexCharts(document.getElementById('chart-cpu-temp'), chart_cpu_temp_options);
+        chart_cpu_temp.render();
+        var chart_gpu_temp_options = {...chart_cpu_temp_options};
+        var chart_gpu_temp = new ApexCharts(document.getElementById('chart-gpu-temp'), chart_gpu_temp_options);
+        chart_gpu_temp.render();
+        var chart_dd_temp_options = {...chart_cpu_temp_options};
+        var chart_dd_temp = new ApexCharts(document.getElementById('chart-dd-temp'), chart_dd_temp_options);
+        chart_dd_temp.render();
         async function update_chart_cpu_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
@@ -542,6 +668,18 @@
                 }
                 chart_cpu_overall.updateSeries(chart_data, true);
                 chart_cpu_overall.updateOptions({ labels: CPU_Sensors["Timeline"] });
+            });
+        }
+        async function update_chart_cpu_temp() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(CPU_Sensors["Temperature"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_cpu_temp.updateSeries(chart_data, true);
             });
         }
         async function update_chart_ram_used() {
@@ -562,6 +700,19 @@
                 chart_gpu_overall.updateOptions({ labels: GPU_Sensors["Timeline"] });
             });
         }
+        async function update_chart_gpu_temp() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(GPU_Sensors["Temperature"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_gpu_temp.updateSeries(chart_data, true);
+            });
+        }
+
         async function update_chart_net_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
@@ -594,6 +745,18 @@
                 });
             });
         }
+        async function update_chart_dd_temp() {
+            return new Promise((resolve, reject) => {
+                const chart_data = [];
+                for (const [type, data] of Object.entries(STO_Sensors["Temperature"])) {
+                    chart_data.push({
+                        name: type,
+                        data: data
+                    });
+                }
+                chart_dd_temp.updateSeries(chart_data, true);
+            });
+        }
         window.chrome.webview.addEventListener("message", event => {
             var data = event.data;
             switch (data.Type) {
@@ -614,10 +777,7 @@
                             "Utilization": [],
                             "Max": [],
                         },
-                        "Temperature": {
-                            "Value": [],
-                            "Max": []
-                        },
+                        "Temperature": {},
                         "Timeline": []
                     };
                     RAM_Sensors = [];
@@ -626,10 +786,7 @@
                             "Utilization": [],
                             "Max": [],
                         },
-                        "Temperature": {
-                            "Value": [],
-                            "Max": []
-                        },
+                        "Temperature": {},
                         "Timeline": []
                     };
                     NET_Sensors = {
@@ -645,6 +802,7 @@
                             "Read": [],
                             "Write": []
                         },
+                        "Temperature": {},
                         "Load": {
                             "Used": [],
                             "Available": []
@@ -668,9 +826,9 @@
                                 }
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
-                                        if (name != "Core (Tctl/Tdie)") continue;
-                                        CPU_Sensors["Temperature"]["Value"].push(value.Value);
-                                        CPU_Sensors["Temperature"]["Max"].push(value.Max);
+                                        if (name.includes("Distance to TjMax")) continue;
+                                        if (CPU_Sensors["Temperature"][name] == undefined) CPU_Sensors["Temperature"][name] = [];
+                                        CPU_Sensors["Temperature"][name].push(parseInt(value.Value));
                                     }
                                 }
                                 break;
@@ -700,6 +858,12 @@
                                         GPU_Sensors["Load"]["Max"].push(value.Max);
                                     }
                                 }
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (GPU_Sensors["Temperature"][name] == undefined) GPU_Sensors["Temperature"][name] = [];
+                                        GPU_Sensors["Temperature"][name].push(parseInt(value.Value));
+                                    }
+                                }
                                 break;
                             case "Network":
                                 if (NET_Sensors["Id"].includes(hardware.Identifier)) break;
@@ -724,6 +888,13 @@
                                 }
                                 break;
                             case "Storage":
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "Temperature") continue;
+                                        if (STO_Sensors["Temperature"][hardware.Identifier] == undefined) STO_Sensors["Temperature"][hardware.Identifier] = [];
+                                        STO_Sensors["Temperature"][hardware.Identifier].push(parseInt(value.Value));
+                                    }
+                                }
                                 if (STO_Sensors["Id"].includes(hardware.Identifier)) break;
                                 STO_Sensors["Id"].push(hardware.Identifier);
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Throughput"])) {
@@ -753,6 +924,9 @@
                     update_chart_gpu_overall();
                     update_chart_net_overall();
                     update_chart_dd_usage();
+                    update_chart_cpu_temp();
+                    update_chart_dd_temp();
+                    update_chart_gpu_temp();
                     break;
                 default:
                     break;
