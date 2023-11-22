@@ -252,7 +252,7 @@
                                 </div>
                             </div>
                             <!--CPU-->
-                            <div class="col-12 col-md-4 col-xl-4">
+                            <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -271,7 +271,7 @@
                                 </div>
                             </div>
                             <!--GPU-->
-                            <div class="col-12 col-md-4 col-xl-4">
+                            <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -290,7 +290,7 @@
                                 </div>
                             </div>
                             <!--Storage Drive-->
-                            <div class="col-12 col-md-4 col-xl-4">
+                            <div class="col-12 col-md-3 col-xl-3">
                                 <div class="card">
                                     <div class="card-stamp">
                                         <div class="card-stamp-icon">
@@ -308,7 +308,27 @@
                                     </div>
                                 </div>
                             </div>
-                            
+                            <!--FAN-->
+                            <div class="col-12 col-md-3 col-xl-3">
+                                <div class="card">
+                                    <div class="card-stamp">
+                                        <div class="card-stamp-icon">
+                                            <i class="bi bi-fan"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="col">
+                                            <div class="text-secondary">
+                                                FAN
+                                            </div>
+                                        </div>
+                                        <div class="col" id="info_motherboard_fans"></div>
+                                        <div class="col" id="info_cpu_fans"></div>
+                                        <div class="col" id="info_gpu_fans"></div>
+                                        <div class="col" id="info_other_fans"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -795,7 +815,8 @@
                             "Max": [],
                         },
                         "Temperature": {},
-                        "Timeline": []
+                        "Timeline": [],
+                        "Fan": []
                     };
                     NET_Sensors = {
                         "Throughput": {
@@ -875,6 +896,23 @@
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (GPU_Sensors["Temperature"][name] == undefined) GPU_Sensors["Temperature"][name] = [];
                                         GPU_Sensors["Temperature"][name].push(parseInt(value.Value));
+                                    }
+                                }
+                                if (GPU_Sensors["Fan"].length > 0) break;
+                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Fan"])) {
+                                    for (const [name, value] of Object.entries(sensor)) {
+                                        if (name != "GPU") continue;
+                                        GPU_Sensors["Fan"].push(hardware.Identifier);
+                                        document.querySelector("#info_gpu_fans").innerHTML = `
+                                        <div class="d-flex align-items-baseline">
+                                            <div class="h1 mb-0 me-2">${value.Value} RPM</div>
+                                            <div class="me-auto">
+                                                <span class="text-green d-inline-flex align-items-center lh-1">
+                                                    <i class="bi bi-gpu-card"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        `;
                                     }
                                 }
                                 break;
