@@ -447,7 +447,7 @@
         });
         var chart_cpu_overall_options = {
             chart: {
-                type: "area",
+                type: "line",
                 fontFamily: 'inherit',
                 height: 150,
                 toolbar: {
@@ -469,8 +469,13 @@
             dataLabels: {
                 enabled: false
             },
+            fill: {
+                opacity: 1,
+            },
             stroke: {
-                curve: "straight"
+                width: 2,
+                lineCap: "round",
+                curve: "smooth"
             },
             markers: {
                 size: 0
@@ -494,7 +499,7 @@
                 max: 100,
                 min: 0
             },
-            colors: [tabler.getColor("green"), tabler.getColor("blue"), tabler.getColor("red")],
+            colors: [tabler.getColor("green"), tabler.getColor("orange"), tabler.getColor("blue"), tabler.getColor("red")],
             legend: {
                 show: false
             },
@@ -660,24 +665,29 @@
         async function update_chart_cpu_overall() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
-                for (const [type, data] of Object.entries(CPU_Sensors["Load"])) {
-                    chart_data.push({
-                        name: type,
-                        data: data
-                    });
+                for (const [identifier, sensor] of Object.entries(CPU_Sensors["Load"])) {
+                    for (const [name, value] of Object.entries(sensor)) {
+                        chart_data.push({
+                            name: identifier + " - " + name,
+                            data: value
+                        });
+                    }
                 }
                 chart_cpu_overall.updateSeries(chart_data, true);
+                console.log(chart_data);
                 chart_cpu_overall.updateOptions({ labels: CPU_Sensors["Timeline"] });
             });
         }
         async function update_chart_cpu_temp() {
             return new Promise((resolve, reject) => {
                 const chart_data = [];
-                for (const [type, data] of Object.entries(CPU_Sensors["Temperature"])) {
-                    chart_data.push({
-                        name: type,
-                        data: data
-                    });
+                for (const [identifier, sensor] of Object.entries(CPU_Sensors["Temperature"])) {
+                    for (const [name, value] of Object.entries(sensor)) {
+                        chart_data.push({
+                            name: identifier + " - " + name,
+                            data: value
+                        });
+                    }
                 }
                 chart_cpu_temp.updateSeries(chart_data, true);
             });
@@ -774,8 +784,6 @@
                     console.log(data.Data);
                     CPU_Sensors = {
                         "Load": {
-                            "Utilization": [],
-                            "Max": [],
                         },
                         "Temperature": {},
                         "Timeline": []
@@ -815,33 +823,38 @@
                             case "Motherboard":
                                 break;
                             case "Cpu":
-                                CPU_Sensors["Timeline"].push(hardware.Timestamp);
+                                if (!CPU_Sensors["Timeline"].includes(hardware.Timestamp)) CPU_Sensors["Timeline"].push(hardware.Timestamp);
                                 document.querySelector("#name_cpu").innerHTML = hardware.Name;
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "CPU Total") continue;
-                                        CPU_Sensors["Load"]["Utilization"].push(value.Value);
-                                        CPU_Sensors["Load"]["Max"].push(value.Max);
+                                        if (CPU_Sensors["Load"][hardware.Identifier] == undefined) CPU_Sensors["Load"][hardware.Identifier] = {
+                                            "Utilization": [],
+                                            "Max": []
+                                        };
+                                        CPU_Sensors["Load"][hardware.Identifier]["Utilization"].push(parseInt(value.Value));
+                                        CPU_Sensors["Load"][hardware.Identifier]["Max"].push(parseInt(value.Max));
                                     }
                                 }
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name.includes("Distance to TjMax")) continue;
-                                        if (CPU_Sensors["Temperature"][name] == undefined) CPU_Sensors["Temperature"][name] = [];
-                                        CPU_Sensors["Temperature"][name].push(parseInt(value.Value));
+                                        if (CPU_Sensors["Temperature"][hardware.Identifier] == undefined) CPU_Sensors["Temperature"][hardware.Identifier] = {};
+                                        if (CPU_Sensors["Temperature"][hardware.Identifier][name] == undefined) CPU_Sensors["Temperature"][hardware.Identifier][name] = [];
+                                        CPU_Sensors["Temperature"][hardware.Identifier][name].push(parseInt(value.Value));
                                     }
                                 }
                                 break;
                             case "Memory":
                                 document.querySelector("#name_ram").innerHTML = hardware.Name;
-                                var used = 0.0;
-                                var available = 0.0;
+                                var used = 0;
+                                var available = 0;
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Data"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name == "Memory Used") {
-                                            used = value.Value;
+                                            used = parseInt(value.Value);
                                         } else if (name == "Memory Available") {
-                                            available = value.Value;
+                                            available = parseInt(value.Value);
                                         }
                                     }
                                 }
@@ -854,8 +867,8 @@
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Load"])) {
                                     for (const [name, value] of Object.entries(sensor)) {
                                         if (name != "GPU Core") continue;
-                                        GPU_Sensors["Load"]["Utilization"].push(value.Value);
-                                        GPU_Sensors["Load"]["Max"].push(value.Max);
+                                        GPU_Sensors["Load"]["Utilization"].push(parseInt(value.Value));
+                                        GPU_Sensors["Load"]["Max"].push(parseInt(value.Max));
                                     }
                                 }
                                 for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
