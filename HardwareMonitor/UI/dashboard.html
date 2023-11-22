@@ -322,7 +322,7 @@
                                                 FAN
                                             </div>
                                         </div>
-                                        <div class="col" id="info_motherboard_fans"></div>
+                                        <div class="col" id="info_io_fans"></div>
                                         <div class="col" id="info_cpu_fans"></div>
                                         <div class="col" id="info_gpu_fans"></div>
                                         <div class="col" id="info_other_fans"></div>
@@ -340,6 +340,7 @@
     <script>
         "use strict";
         var machine_id = 0;
+        var IO_Sensors = {};
         var CPU_Sensors = {};
         var RAM_Sensors = [];
         var GPU_Sensors = {};
@@ -802,6 +803,9 @@
                     break;
                 case "Hardware":
                     console.log(data.Data);
+                    IO_Sensors = {
+                        "Fan": {}
+                    }
                     CPU_Sensors = {
                         "Load": {
                         },
@@ -842,6 +846,27 @@
                     data.Data.forEach(hardware => {
                         switch (hardware.Hardware) {
                             case "Motherboard":
+                                break;
+                            case "SuperIO":
+                                if (JSON.parse(hardware.Sensors)["Fan"] != undefined) {
+                                    if (IO_Sensors["Fan"][hardware.Identifier] != undefined) break;
+                                    for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Fan"])) {
+                                        for (const [name, value] of Object.entries(sensor)) {
+                                            if (parseInt(value.Value) == 0) continue;
+                                            IO_Sensors["Fan"][hardware.Identifier] = parseInt(value.Value);
+                                            document.querySelector("#info_io_fans").innerHTML = `
+                                            <div class="d-flex align-items-baseline">
+                                                <div class="h1 mb-0 me-2">${parseInt(value.Value)} RPM</div>
+                                                <div class="me-auto">
+                                                    <span class="text-green d-inline-flex align-items-center lh-1">
+                                                        <i class="bi bi-motherboard"></i>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            `;
+                                        }
+                                    }
+                                }
                                 break;
                             case "Cpu":
                                 if (!CPU_Sensors["Timeline"].includes(hardware.Timestamp)) CPU_Sensors["Timeline"].push(hardware.Timestamp);
@@ -892,27 +917,31 @@
                                         GPU_Sensors["Load"]["Max"].push(parseInt(value.Max));
                                     }
                                 }
-                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
-                                    for (const [name, value] of Object.entries(sensor)) {
-                                        if (GPU_Sensors["Temperature"][name] == undefined) GPU_Sensors["Temperature"][name] = [];
-                                        GPU_Sensors["Temperature"][name].push(parseInt(value.Value));
+                                if (JSON.parse(hardware.Sensors)["Temperature"] != undefined) {
+                                    for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Temperature"])) {
+                                        for (const [name, value] of Object.entries(sensor)) {
+                                            if (GPU_Sensors["Temperature"][name] == undefined) GPU_Sensors["Temperature"][name] = [];
+                                            GPU_Sensors["Temperature"][name].push(parseInt(value.Value));
+                                        }
                                     }
                                 }
-                                if (GPU_Sensors["Fan"].length > 0) break;
-                                for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Fan"])) {
-                                    for (const [name, value] of Object.entries(sensor)) {
-                                        if (name != "GPU") continue;
-                                        GPU_Sensors["Fan"].push(hardware.Identifier);
-                                        document.querySelector("#info_gpu_fans").innerHTML = `
-                                        <div class="d-flex align-items-baseline">
-                                            <div class="h1 mb-0 me-2">${value.Value} RPM</div>
-                                            <div class="me-auto">
-                                                <span class="text-green d-inline-flex align-items-center lh-1">
-                                                    <i class="bi bi-gpu-card"></i>
-                                                </span>
+                                if (JSON.parse(hardware.Sensors)["Fan"] != undefined) {
+                                    if (GPU_Sensors["Fan"].length > 0) break;
+                                    for (const [id, sensor] of Object.entries(JSON.parse(hardware.Sensors)["Fan"])) {
+                                        for (const [name, value] of Object.entries(sensor)) {
+                                            if (name != "GPU") continue;
+                                            GPU_Sensors["Fan"].push(hardware.Identifier);
+                                            document.querySelector("#info_gpu_fans").innerHTML = `
+                                            <div class="d-flex align-items-baseline">
+                                                <div class="h1 mb-0 me-2">${value.Value} RPM</div>
+                                                <div class="me-auto">
+                                                    <span class="text-green d-inline-flex align-items-center lh-1">
+                                                        <i class="bi bi-gpu-card"></i>
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        `;
+                                            `;
+                                        }
                                     }
                                 }
                                 break;
