@@ -554,6 +554,9 @@
                     bottom: 30,
                 }
             },
+            stroke: {
+                show: false
+            },
             legend: {
                 show: false
             },
@@ -624,7 +627,7 @@
                 heatmap: {
                     shadeIntensity: 0.5,
                     radius: 0,
-                    useFillColorAsStroke: true,
+                    useFillColorAsStroke: false,
                     colorScale: {
                         ranges: [{
                             from: 0,
@@ -661,7 +664,8 @@
                 enabled: false
             },
             stroke: {
-                width: 1
+                width: 1,
+                colors: ['#182433']
             }
         }
         var chart_dd_usage_options = {...chart_net_overall_options};
@@ -695,7 +699,6 @@
                     }
                 }
                 chart_cpu_overall.updateSeries(chart_data, true);
-                console.log(chart_data);
                 chart_cpu_overall.updateOptions({ labels: CPU_Sensors["Timeline"] });
             });
         }
