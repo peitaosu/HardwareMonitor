@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <Reference Include="LibreHardwareMonitorLib">
-      <HintPath>..\..\LibreHardwareMonitor\bin\Debug\net8.0\LibreHardwareMonitorLib.dll</HintPath>
+      <HintPath>..\LibreHardwareMonitor\bin\$(Configuration)\net8.0\LibreHardwareMonitorLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 
