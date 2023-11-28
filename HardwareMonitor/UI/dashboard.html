@@ -5,7 +5,6 @@
     <title>Hardware Monitor</title>
     <link rel="stylesheet" href="tabler/dist/css/tabler.min.css">
     <link rel="stylesheet" href="tabler/dist/css/tabler-flags.min.css">
-    <link rel="stylesheet" href="tabler-icons/tabler-icons.min.css">
     <link rel="stylesheet" href="tabler/dist/libs/apexcharts/dist/apexcharts.css">
     <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/custom.css">
@@ -16,42 +15,42 @@
             <header id="main_navbar" class="navbar navbar-expand-md sticky-top d-print-none">
                 <div class="container-xl">
                     <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-                        <i class="ti ti-heart-rate-monitor"></i> Hardware Monitor
+                        <i class="bi bi-display"></i> Hardware Monitor
                     </h1>
                     <div class="navbar-nav flex-row order-md-last">
                         <div class="nav-item">
                             <a id="dialog_mini" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-arrow-bar-down"></i>
+                                <i class="bi bi-arrow-down-square"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_pin" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-pin"></i>
+                                <i class="bi bi-pin-angle"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_opacity" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-background"></i>
+                                <i class="bi bi-transparency"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_stack" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-align-box-left-stretch"></i>
+                                <i class="bi bi-view-stacked"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_center" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-window-minimize"></i>
+                                <i class="bi bi-aspect-ratio"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_max" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-window-maximize"></i>
+                                <i class="bi bi-arrows-fullscreen"></i>
                             </a>
                         </div>
                         <div class="nav-item">
                             <a id="dialog_x" href="#" class="nav-link d-flex lh-1 text-reset p-0">
-                                <i class="ti ti-square-x"></i>
+                                <i class="bi bi-x-square"></i>
                             </a>
                         </div>
                     </div>
@@ -444,8 +443,8 @@
             });
         });
         document.querySelector("#dialog_pin i").addEventListener("click", event=>{
-            event.currentTarget.classList.toggle("ti-pin");
-            event.currentTarget.classList.toggle("ti-pinned-filled");
+            event.currentTarget.classList.toggle("bi-pin-angle");
+            event.currentTarget.classList.toggle("bi-pin-fill");
         });
         const main_navbar = document.querySelector("#main_navbar");
         const body = document.querySelector("body");
