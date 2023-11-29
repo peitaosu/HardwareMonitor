@@ -1,6 +1,6 @@
 {
-    "DatabasePath": "test.sqlite3",
-    "LogPath": "test.log",
+    "DatabasePath": "HM.sqlite3",
+    "LogPath": "HM.log",
     "WebCachePath": "C:\\ProgramData\\HardwareMonitor\\Cache",
     "UseOnlinePage": false,
     "JsonOptions": {
