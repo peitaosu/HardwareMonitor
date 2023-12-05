@@ -43,7 +43,7 @@ namespace HardwareMonitor
             var webView2Environment = await CoreWebView2Environment.CreateAsync(null, SettingManager.GetSetting().WebCachePath, options);
             await webView.EnsureCoreWebView2Async(webView2Environment);
             NavigateTo("UI/dashboard.html", null);
-            //webView.CoreWebView2.AddHostObjectToScript("utils", new Utils());
+            webView.CoreWebView2.AddHostObjectToScript("utils", new Utils());
             webView.CoreWebView2.WebMessageReceived += ProcessWebMessage;
         }
 

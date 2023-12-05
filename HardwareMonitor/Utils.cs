@@ -2,7 +2,7 @@
 
 namespace HardwareMonitor
 {
-    class Utils
+    public class Utils
     {
         public static double GetTimestamp()
         {
