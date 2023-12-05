@@ -804,6 +804,9 @@
                     document.querySelector("#info_motherboard").innerHTML = `${data.Data.SMBios.Board.ManufacturerName}<br/>${data.Data.SMBios.Board.ProductName}<br/><br/>SN: ${data.Data.SMBios.Board.SerialNumber}<br/>`;
                     break;
                 case "Hardware":
+                    if (data.Data == null) {
+                        break;
+                    }
                     console.log(data.Data);
                     IO_Sensors = {
                         "Fan": {}
